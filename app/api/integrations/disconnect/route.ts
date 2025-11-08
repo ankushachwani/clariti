@@ -26,13 +26,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Delete the integration
-    await prisma.integration.deleteMany({
+    // Find the integration to get the access token
+    const integration = await prisma.integration.findFirst({
       where: {
         userId: user.id,
         provider: provider,
       },
     });
+
+    if (integration) {
+      // Revoke access token based on provider
+      try {
+        if (provider === 'slack') {
+          // Revoke Slack token
+          const accessToken = integration.accessToken;
+          if (accessToken) {
+            await fetch('https://slack.com/api/auth.revoke', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: `token=${accessToken}`,
+            });
+          }
+        } else if (provider === 'google_calendar' || provider === 'gmail') {
+          // Revoke Google token (Gmail and Calendar use same token)
+          const account = await prisma.account.findFirst({
+            where: {
+              userId: user.id,
+              provider: 'google',
+            },
+          });
+          
+          if (account?.access_token) {
+            await fetch(`https://oauth2.googleapis.com/revoke?token=${account.access_token}`, {
+              method: 'POST',
+            });
+          }
+        } else if (provider === 'canvas') {
+          // Canvas tokens are personal access tokens - can't be revoked via API
+          // User needs to manually revoke from Canvas settings
+          console.log('Canvas token should be manually revoked from Canvas settings');
+        }
+        // Add more providers as needed (Discord, Notion, etc.)
+      } catch (revokeError) {
+        console.error('Error revoking token:', revokeError);
+        // Continue to delete from database even if revoke fails
+      }
+
+      // Delete the integration from database
+      await prisma.integration.delete({
+        where: {
+          id: integration.id,
+        },
+      });
+    }
 
     return NextResponse.json({ 
       success: true,
