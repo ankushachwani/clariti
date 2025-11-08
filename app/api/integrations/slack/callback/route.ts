@@ -102,17 +102,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Redirect back to onboarding or profile
-    const referer = request.headers.get('referer') || '';
-    const redirectUrl = referer.includes('/profile') 
-      ? `${process.env.NEXTAUTH_URL}/profile?success=slack_connected`
-      : `${process.env.NEXTAUTH_URL}/onboarding?success=slack_connected`;
+    // Redirect back to onboarding or profile with success message
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://clariti-ten.vercel.app';
+    const redirectUrl = `${baseUrl}/profile?success=slack_connected`;
     
     return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error('Slack OAuth callback error:', error);
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://clariti-ten.vercel.app';
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/onboarding?error=slack_failed`
+      `${baseUrl}/profile?error=slack_failed`
     );
   }
 }

@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
   authUrl.searchParams.append('scope', scopes);
   authUrl.searchParams.append('redirect_uri', redirectUri);
   authUrl.searchParams.append('state', state);
+  authUrl.searchParams.append('granular_bot_scope', '1'); // Prevent desktop app launch
 
   return NextResponse.redirect(authUrl.toString());
 }
