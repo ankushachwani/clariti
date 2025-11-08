@@ -56,6 +56,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
   const { data: session } = useSession();
   const [integrations, setIntegrations] = useState(initialIntegrations);
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [showCanvasModal, setShowCanvasModal] = useState(false);
   const [canvasToken, setCanvasToken] = useState('');
   const [canvasUrl, setCanvasUrl] = useState('https://umamherst.instructure.com');
@@ -127,6 +128,8 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
       return;
     }
 
+    setDisconnecting(provider);
+
     try {
       const response = await fetch('/api/integrations/disconnect', {
         method: 'POST',
@@ -136,15 +139,20 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
         body: JSON.stringify({ provider }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         // Refresh to show updated integrations
         router.refresh();
       } else {
-        alert('Failed to disconnect. Please try again.');
+        console.error('Disconnect error:', data);
+        alert(`Failed to disconnect: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error disconnecting:', error);
-      alert('Failed to disconnect. Please try again.');
+      alert('Failed to disconnect. Please check console for details.');
+    } finally {
+      setDisconnecting(null);
     }
   };
 
@@ -306,10 +314,17 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
                   ) : (
                     <button
                       onClick={() => handleDisconnect(config.provider)}
-                      disabled={connecting === config.provider}
-                      className="w-full px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                      disabled={disconnecting === config.provider}
+                      className="w-full px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50 flex items-center justify-center"
                     >
-                      Disconnect
+                      {disconnecting === config.provider ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Disconnecting...
+                        </>
+                      ) : (
+                        'Disconnect'
+                      )}
                     </button>
                   )
                 ) : (
