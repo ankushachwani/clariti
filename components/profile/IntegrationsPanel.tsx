@@ -123,20 +123,28 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
   };
 
   const handleDisconnect = async (provider: string) => {
+    if (!confirm(`Are you sure you want to disconnect ${provider}?`)) {
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/integrations/${provider}/disconnect`, {
+      const response = await fetch('/api/integrations/disconnect', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ provider }),
       });
 
       if (response.ok) {
-        setIntegrations((prev) =>
-          prev.map((i) =>
-            i.provider === provider ? { ...i, isConnected: false } : i
-          )
-        );
+        // Refresh to show updated integrations
+        router.refresh();
+      } else {
+        alert('Failed to disconnect. Please try again.');
       }
     } catch (error) {
       console.error('Error disconnecting:', error);
+      alert('Failed to disconnect. Please try again.');
     }
   };
 
