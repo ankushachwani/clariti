@@ -36,9 +36,9 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
   };
 
   const getPriorityColor = (priority: number) => {
-    if (priority >= 8) return 'bg-red-500';
-    if (priority >= 5) return 'bg-orange-500';
-    return 'bg-yellow-500';
+    if (priority >= 8) return 'bg-sunset-coral';
+    if (priority >= 5) return 'bg-clay-orange';
+    return 'bg-sunflower-yellow';
   };
 
   const previousMonth = () => {
@@ -58,32 +58,32 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Calendar Grid */}
-      <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
+      <div className="lg:col-span-2 bg-cream-white rounded-3xl shadow-md shadow-earth-brown/20 border-2 border-sage-gray/30 p-6">
         {/* Calendar Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold font-serif text-forest-green">
             {format(currentDate, 'MMMM yyyy')}
           </h2>
           <div className="flex items-center gap-2">
             <button
               onClick={goToToday}
-              className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+              className="px-4 py-2 text-sm font-medium text-forest-green bg-moss-green/20 hover:bg-moss-green/30 rounded-full transition-all border border-moss-green/30"
             >
               Today
             </button>
             <button
               onClick={previousMonth}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+              className="p-2 hover:bg-stone-beige rounded-full transition-colors"
               aria-label="Previous month"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <ChevronLeft className="w-5 h-5 text-forest-green" />
             </button>
             <button
               onClick={nextMonth}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+              className="p-2 hover:bg-stone-beige rounded-full transition-colors"
               aria-label="Next month"
             >
-              <ChevronRight className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <ChevronRight className="w-5 h-5 text-forest-green" />
             </button>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <div
               key={day}
-              className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 py-2"
+              className="text-center text-sm font-bold text-bark-brown py-2"
             >
               {day}
             </div>
@@ -113,20 +113,20 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={`
-                  min-h-[80px] p-2 rounded-lg border transition-all
-                  ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900/50'}
-                  ${isSelectedDay ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200 dark:border-gray-700'}
-                  ${isTodayDay && !isSelectedDay ? 'ring-2 ring-blue-300 dark:ring-blue-700' : ''}
-                  hover:bg-gray-50 dark:hover:bg-gray-800
+                  min-h-[80px] p-2 rounded-2xl border-2 transition-all
+                  ${isCurrentMonth ? 'bg-stone-beige/30' : 'bg-sage-gray/10'}
+                  ${isSelectedDay ? 'ring-2 ring-moss-green border-moss-green' : 'border-sage-gray/30'}
+                  ${isTodayDay && !isSelectedDay ? 'ring-2 ring-forest-green/50 border-forest-green/50' : ''}
+                  hover:bg-stone-beige hover:shadow-sm
                 `}
               >
                 <div className="flex flex-col h-full">
                   <span
                     className={`text-sm font-medium mb-1 ${
                       isCurrentMonth
-                        ? 'text-gray-900 dark:text-white'
-                        : 'text-gray-400 dark:text-gray-600'
-                    } ${isTodayDay ? 'font-bold text-blue-600 dark:text-blue-400' : ''}`}
+                        ? 'text-forest-green'
+                        : 'text-sage-gray'
+                    } ${isTodayDay ? 'font-bold text-moss-green' : ''}`}
                   >
                     {format(day, 'd')}
                   </span>
@@ -135,14 +135,14 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
                       {dayTasks.slice(0, 3).map((task, idx) => (
                         <div
                           key={task.id}
-                          className={`w-1.5 h-1.5 rounded-full ${getPriorityColor(
+                          className={`w-2 h-2 rounded-full ${getPriorityColor(
                             task.priority
                           )}`}
                           title={task.title}
                         />
                       ))}
                       {dayTasks.length > 3 && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-bark-brown font-medium">
                           +{dayTasks.length - 3}
                         </span>
                       )}
@@ -156,8 +156,8 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
       </div>
 
       {/* Selected Day Tasks */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6 h-fit">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <div className="bg-cream-white rounded-3xl shadow-md shadow-earth-brown/20 border-2 border-sage-gray/30 p-6 h-fit">
+        <h3 className="text-lg font-bold font-serif text-forest-green mb-4 flex items-center gap-2">
           <CalendarIcon className="w-5 h-5" />
           {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
         </h3>
@@ -167,7 +167,7 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
             {tasksOnSelectedDate.map((task) => (
               <div
                 key={task.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+                className="border-2 border-sage-gray/30 rounded-2xl p-3 bg-stone-beige/20 hover:bg-stone-beige/40 transition-all"
               >
                 <div className="flex items-start gap-2">
                   <div
@@ -176,21 +176,21 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
                     )}`}
                   />
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                    <h4 className="text-sm font-bold text-forest-green">
                       {task.title}
                     </h4>
                     {task.course && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-bark-brown mt-1">
                         {task.course}
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-moss-green/20 text-forest-green px-2 py-1 rounded-full font-medium">
                         {task.source}
                       </span>
                       {task.completed && (
-                        <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
-                          Completed
+                        <span className="text-xs bg-moss-green/30 text-forest-green px-2 py-1 rounded-full font-medium">
+                          ✓ Completed
                         </span>
                       )}
                     </div>
@@ -200,11 +200,11 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
             ))}
           </div>
         ) : selectedDate ? (
-          <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-8">
+          <p className="text-sm text-bark-brown text-center py-8">
             No tasks on this date
           </p>
         ) : (
-          <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-8">
+          <p className="text-sm text-bark-brown text-center py-8">
             Select a date to view tasks
           </p>
         )}

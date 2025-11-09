@@ -76,24 +76,24 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-cream-white rounded-3xl shadow-md shadow-earth-brown/20 border-2 border-sage-gray/30 p-6">
       <div className="flex items-center gap-3 mb-6">
-        <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <Bell className="w-7 h-7 text-forest-green" />
+        <h2 className="text-2xl font-bold font-serif text-forest-green">
           Notification Preferences
         </h2>
       </div>
 
       {/* Test Email Button - Prominent at the top */}
-      <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div className="mb-6 p-5 bg-gradient-to-r from-moss-green/20 to-ocean-teal/20 border-2 border-moss-green/30 rounded-2xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-start gap-3">
-            <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <Mail className="w-6 h-6 text-forest-green mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-base font-bold text-forest-green">
                 Test Daily Debrief Email
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm text-bark-brown mt-1">
                 Send yourself a preview email with your actual tasks
               </p>
             </div>
@@ -101,11 +101,11 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
           <button
             onClick={handleSendTestEmail}
             disabled={sendingTest}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-all whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-forest-green to-moss-green hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed text-cream-white rounded-full text-sm font-medium transition-all whitespace-nowrap"
           >
             {sendingTest ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-cream-white border-t-transparent rounded-full animate-spin"></div>
                 Sending...
               </>
             ) : (
@@ -119,10 +119,10 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
         
         {/* Test Email Message */}
         {testEmailMessage && (
-          <div className={`mt-3 p-3 rounded-lg text-sm font-medium ${
+          <div className={`mt-3 p-3 rounded-2xl text-sm font-medium ${
             testEmailMessage.type === 'success' 
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
+              ? 'bg-moss-green/30 text-forest-green border-2 border-moss-green/40'
+              : 'bg-sunset-coral/20 text-sunset-coral border-2 border-sunset-coral/30'
           }`}>
             {testEmailMessage.text}
           </div>
@@ -131,12 +131,12 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
 
       <div className="space-y-4">
         {/* Daily Brief */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between py-3 border-b-2 border-sage-gray/30">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-bold text-forest-green">
               Daily Brief
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-bark-brown mt-1">
               Receive a daily summary of your tasks and priorities
             </p>
           </div>
@@ -147,32 +147,32 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
               onChange={(e) => handleToggle('dailyBrief', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <div className="w-11 h-6 bg-sage-gray/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-moss-green/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cream-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-cream-white after:border-sage-gray after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-moss-green"></div>
           </label>
         </div>
 
         {/* Daily Brief Time */}
         {settings?.dailyBrief && (
           <div className="ml-4 flex items-center justify-between py-2">
-            <label className="text-sm text-gray-700 dark:text-gray-300">
+            <label className="text-sm text-bark-brown font-medium">
               Daily Brief Time
             </label>
             <input
               type="time"
               value={settings?.dailyBriefTime ?? '08:00'}
               onChange={(e) => handleTimeChange(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown text-sm focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
             />
           </div>
         )}
 
         {/* Assignment Reminders */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between py-3 border-b-2 border-sage-gray/30">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-bold text-forest-green">
               Assignment Reminders
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-bark-brown mt-1">
               Get notified about upcoming assignment deadlines
             </p>
           </div>
@@ -183,17 +183,17 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
               onChange={(e) => handleToggle('assignmentReminders', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <div className="w-11 h-6 bg-sage-gray/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-moss-green/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cream-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-cream-white after:border-sage-gray after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-moss-green"></div>
           </label>
         </div>
 
         {/* Email Notifications */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between py-3 border-b-2 border-sage-gray/30">
           <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h3 className="text-sm font-bold text-forest-green">
               Email Notifications
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-bark-brown mt-1">
               Receive notifications via email
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
               onChange={(e) => handleToggle('emailNotifications', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <div className="w-11 h-6 bg-sage-gray/30 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-moss-green/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cream-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-cream-white after:border-sage-gray after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-moss-green"></div>
           </label>
         </div>
       </div>

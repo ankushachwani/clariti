@@ -202,17 +202,17 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
               </div>
 
               {tokenError && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                  <p className="text-sm text-red-600 dark:text-red-400">{tokenError}</p>
+                <div className="bg-sunset-coral/20 border-2 border-sunset-coral/30 rounded-2xl p-3">
+                  <p className="text-sm text-sunset-coral font-medium">{tokenError}</p>
                 </div>
               )}
 
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2 flex items-center">
+              <div className="bg-gradient-to-r from-moss-green/20 to-ocean-teal/20 border-2 border-moss-green/30 rounded-2xl p-4">
+                <h4 className="text-sm font-bold text-forest-green mb-2 flex items-center">
                   <Key className="w-4 h-4 mr-2" />
                   How to get your token:
                 </h4>
-                <ol className="text-xs text-blue-800 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                <ol className="text-xs text-bark-brown space-y-1 list-decimal list-inside">
                   <li>Go to Canvas → Account → Settings</li>
                   <li>Scroll to "Approved Integrations"</li>
                   <li>Click "+ New Access Token"</li>
@@ -224,7 +224,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
               <button
                 onClick={handleCanvasTokenSubmit}
                 disabled={connecting === 'canvas'}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+                className="w-full bg-gradient-to-br from-forest-green to-moss-green hover:shadow-lg hover:scale-105 disabled:opacity-50 text-cream-white font-medium py-3 px-4 rounded-full transition-all flex items-center justify-center"
               >
                 {connecting === 'canvas' ? (
                   <>

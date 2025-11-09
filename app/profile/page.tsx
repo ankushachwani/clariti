@@ -32,10 +32,10 @@ export default async function ProfilePage() {
       <main className="min-h-screen bg-gradient-to-br from-cream-white via-stone-beige to-sage-gray/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold font-serif text-forest-green flex items-center">
-              <span className="mr-3">⚙️</span> Profile & Settings
+            <h1 className="text-4xl font-bold font-serif text-forest-green flex items-center gap-3">
+              ⚙️ Profile & Settings
             </h1>
-            <p className="text-bark-brown mt-2 text-lg">
+            <p className="text-bark-brown text-lg mt-2">
               Manage your account, integrations, and preferences
             </p>
           </div>
