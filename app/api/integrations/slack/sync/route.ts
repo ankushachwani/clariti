@@ -64,6 +64,11 @@ export async function POST(request: NextRequest) {
         
         console.log('Slack channels response:', { ok: channelsData.ok, channelCount: channelsData.channels?.length, error: channelsData.error });
         
+        if (!channelsData.ok) {
+          console.error('Slack API error:', channelsData.error);
+          throw new Error(`Slack API error: ${channelsData.error}`);
+        }
+        
         if (channelsData.ok && channelsData.channels) {
           const sevenDaysAgo = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
           
@@ -327,7 +332,7 @@ Respond with ONLY a JSON object (no markdown):
 }`;
 
     const response = await cohere.chat({
-      model: 'command-r',
+      model: 'command-r-plus',
       message: prompt,
       temperature: 0.3,
     });
