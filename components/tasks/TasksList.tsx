@@ -45,19 +45,19 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'assignment':
-        return { label: 'Assignment', icon: '📚', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' };
+        return { label: 'Assignment', icon: '📚', color: 'bg-sky-blue/30 border-sky-blue/50 text-forest-green' };
       case 'announcement':
-        return { label: 'Announcement', icon: '📢', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' };
+        return { label: 'Announcement', icon: '📢', color: 'bg-clay-orange/30 border-clay-orange/50 text-forest-green' };
       case 'quiz':
-        return { label: 'Quiz', icon: '📝', color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' };
+        return { label: 'Quiz', icon: '📝', color: 'bg-moss-green/30 border-moss-green/50 text-forest-green' };
       case 'discussion':
-        return { label: 'Discussion', icon: '💬', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' };
+        return { label: 'Discussion', icon: '💬', color: 'bg-sunflower-yellow/30 border-sunflower-yellow/50 text-forest-green' };
       case 'meeting':
-        return { label: 'Meeting', icon: '📅', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400' };
+        return { label: 'Meeting', icon: '📅', color: 'bg-ocean-teal/30 border-ocean-teal/50 text-forest-green' };
       case 'email':
-        return { label: 'Email', icon: '📧', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400' };
+        return { label: 'Email', icon: '📧', color: 'bg-sunset-coral/30 border-sunset-coral/50 text-forest-green' };
       default:
-        return { label: 'Task', icon: '✓', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400' };
+        return { label: 'Task', icon: '✓', color: 'bg-sage-gray/30 border-sage-gray/50 text-bark-brown' };
     }
   };
 
@@ -184,10 +184,11 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
   return (
     <div className="space-y-6">
       {/* Filters and Actions */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-6 shadow-md shadow-earth-brown/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent to-sage-gray/5"></div>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto">
-            <Filter className="w-5 h-5 text-gray-500 flex-shrink-0" />
+            <Filter className="w-5 h-5 text-forest-green flex-shrink-0" />
             {[
               { value: 'all', label: 'All' },
               { value: 'high', label: 'High Priority' },
@@ -198,10 +199,10 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
               <button
                 key={f.value}
                 onClick={() => setFilter(f.value as FilterType)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-300 ${
                   filter === f.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-gradient-to-br from-forest-green to-moss-green text-cream-white shadow-md'
+                    : 'bg-stone-beige/50 text-bark-brown hover:bg-sage-gray/30 hover:shadow-sm'
                 }`}
               >
                 {f.label}
@@ -215,9 +216,9 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                 type="checkbox"
                 checked={showCompleted}
                 onChange={(e) => setShowCompleted(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                className="w-4 h-4 text-forest-green rounded border-sage-gray focus:ring-forest-green"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-bark-brown font-medium">
                 Show completed
               </span>
             </label>
@@ -225,7 +226,7 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
             <button
               onClick={handleSync}
               disabled={syncing}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-forest-green to-moss-green text-cream-white text-sm font-medium rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 transition-all duration-300"
             >
               <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
               Sync

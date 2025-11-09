@@ -76,36 +76,38 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Notification Preferences
-        </h2>
-      </div>
+    <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-8 shadow-md shadow-earth-brown/20 hover:shadow-lg hover:shadow-earth-brown/30 transition-all duration-500 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-sage-gray/5"></div>
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-6">
+          <Bell className="w-7 h-7 text-forest-green" />
+          <h2 className="text-2xl font-bold font-serif text-forest-green">
+            Notification Preferences
+          </h2>
+        </div>
 
-      {/* Test Email Button - Prominent at the top */}
-      <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                Test Daily Debrief Email
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Send yourself a preview email with your actual tasks
-              </p>
+        {/* Test Email Button - Prominent at the top */}
+        <div className="mb-6 p-5 bg-gradient-to-r from-moss-green/20 to-ocean-teal/20 border-2 border-moss-green/40 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <Mail className="w-7 h-7 text-forest-green mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-bold font-serif text-forest-green">
+                  Test Daily Debrief Email
+                </h3>
+                <p className="text-sm text-bark-brown mt-1 font-medium">
+                  Send yourself a preview email with your actual tasks
+                </p>
+              </div>
             </div>
-          </div>
           <button
             onClick={handleSendTestEmail}
             disabled={sendingTest}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-br from-forest-green to-moss-green hover:shadow-xl hover:scale-105 disabled:bg-sage-gray disabled:cursor-not-allowed text-cream-white rounded-full text-sm font-bold transition-all shadow-md whitespace-nowrap"
           >
             {sendingTest ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-cream-white border-t-transparent rounded-full animate-spin"></div>
                 Sending...
               </>
             ) : (
@@ -119,10 +121,10 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
         
         {/* Test Email Message */}
         {testEmailMessage && (
-          <div className={`mt-3 p-3 rounded-lg text-sm font-semibold ${
+          <div className={`mt-3 p-3 rounded-2xl text-sm font-semibold ${
             testEmailMessage.type === 'success' 
-              ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border-2 border-green-300 dark:border-green-600'
-              : 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 border-2 border-red-300 dark:border-red-600'
+              ? 'bg-moss-green/30 text-forest-green border-2 border-moss-green'
+              : 'bg-sunset-coral/30 text-sunset-coral border-2 border-sunset-coral'
           }`}>
             {testEmailMessage.text}
           </div>
@@ -208,6 +210,7 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
           </label>
         </div>
       </div>
+    </div>
     </div>
   );
 }
