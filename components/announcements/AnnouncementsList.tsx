@@ -69,7 +69,7 @@ export default function AnnouncementsList({ announcements: initialAnnouncements 
   return (
     <div className="space-y-6">
       {/* Header with actions */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-4">
+      <div className="bg-white/80 dark:bg-gray-900 rounded-lg shadow-md border border-gray-300 dark:border-gray-800 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -101,7 +101,7 @@ export default function AnnouncementsList({ announcements: initialAnnouncements 
 
       {/* Unread Announcements */}
       {unreadAnnouncements.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
+        <div className="bg-white/80 dark:bg-gray-900 rounded-lg shadow-md border border-gray-300 dark:border-gray-800 p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
             Unread ({unreadAnnouncements.length})
@@ -171,7 +171,7 @@ export default function AnnouncementsList({ announcements: initialAnnouncements 
 
       {/* Read Announcements */}
       {showRead && readAnnouncements.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
+        <div className="bg-white/80 dark:bg-gray-900 rounded-lg shadow-md border border-gray-300 dark:border-gray-800 p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
             Read ({readAnnouncements.length})
@@ -230,7 +230,7 @@ export default function AnnouncementsList({ announcements: initialAnnouncements 
 
       {/* Empty State */}
       {unreadAnnouncements.length === 0 && (!showRead || readAnnouncements.length === 0) && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-12 text-center">
+        <div className="bg-white/80 dark:bg-gray-900 rounded-lg shadow-md border border-gray-300 dark:border-gray-800 p-12 text-center">
           <div className="text-6xl mb-4">📢</div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             No announcements yet

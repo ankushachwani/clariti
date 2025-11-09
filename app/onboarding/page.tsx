@@ -23,13 +23,13 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <main className="min-h-screen bg-gradient-to-br from-cream-white via-stone-beige to-sage-gray/20">
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+          <h1 className="text-5xl font-bold font-serif text-forest-green mb-4">
             Welcome to Clariti! 👋
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <p className="text-xl text-bark-brown">
             Let's connect your apps to bring everything together
           </p>
         </div>
