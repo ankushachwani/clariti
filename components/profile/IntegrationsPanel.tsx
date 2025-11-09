@@ -336,21 +336,6 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
           );
         })}
       </div>
-
-      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-        <p className="text-sm text-blue-900 dark:text-blue-200 flex items-start gap-2">
-          <ExternalLink className="w-4 h-4 mt-0.5 flex-shrink-0" />
-          <span>
-            Need help setting up integrations? Check out the{' '}
-            <a
-              href="/INTEGRATION_SETUP.md"
-              className="font-semibold underline hover:no-underline"
-            >
-              Integration Setup Guide
-            </a>
-          </span>
-        </p>
-      </div>
     </div>
   );
 }

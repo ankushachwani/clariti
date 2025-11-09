@@ -142,29 +142,8 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
           </label>
         </div>
 
-        {/* Attendance Alerts */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-              Attendance Alerts
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Receive alerts about missed classes and attendance warnings
-            </p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings?.attendanceAlerts ?? true}
-              onChange={(e) => handleToggle('attendanceAlerts', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
-
         {/* Email Notifications */}
-        <div className="flex items-center justify-between py-3">
+        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">
               Email Notifications
@@ -184,25 +163,25 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
           </label>
         </div>
 
-        {/* Test Email Button */}
-        {settings?.emailNotifications && settings?.dailyBrief && (
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        {/* Test Email Button - Always visible when email notifications are enabled */}
+        {settings?.emailNotifications && (
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
-                    Test Email
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Test Daily Debrief Email
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Send a test daily debrief email to see how it looks
+                    Preview your personalized daily debrief with your actual tasks
                   </p>
                 </div>
               </div>
               <button
                 onClick={handleSendTestEmail}
                 disabled={sendingTest}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               >
                 {sendingTest ? (
                   <>
@@ -212,7 +191,7 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    Send Test
+                    Send Test Email
                   </>
                 )}
               </button>
@@ -220,10 +199,10 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
             
             {/* Test Email Message */}
             {testEmailMessage && (
-              <div className={`mt-4 p-3 rounded-lg text-sm ${
+              <div className={`mt-3 p-3 rounded-lg text-sm font-medium ${
                 testEmailMessage.type === 'success' 
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
+                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700'
+                  : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700'
               }`}>
                 {testEmailMessage.text}
               </div>
