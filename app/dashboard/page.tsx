@@ -9,6 +9,7 @@ import PriorityTasks from '@/components/dashboard/PriorityTasks';
 import Navbar from '@/components/layout/Navbar';
 
 export const revalidate = 0; // Disable caching for real-time data
+export const dynamic = 'force-dynamic'; // Force dynamic rendering
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
