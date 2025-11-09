@@ -91,28 +91,38 @@ export async function POST(request: NextRequest) {
               continue;
             }
 
-            await prisma.task.create({
-              data: {
+            // Check if task already exists to prevent duplicates
+            const existingTask = await prisma.task.findFirst({
+              where: {
                 userId: user.id,
-                source: 'slack',
                 sourceId: messageId,
-                title: aiAnalysis.title,
-                description: aiAnalysis.description,
-                dueDate: aiAnalysis.dueDate,
-                completed: false,
-                category: 'email',
-                sourceUrl: match.permalink || undefined,
-                metadata: {
-                  channel: match.channel?.name,
-                  channelId: match.channel?.id,
-                  type: 'search',
-                  aiDetermined: true,
-                  originalText: text.substring(0, 200),
-                },
               },
             });
 
-            totalItems++;
+            if (!existingTask) {
+              await prisma.task.create({
+                data: {
+                  userId: user.id,
+                  source: 'slack',
+                  sourceId: messageId,
+                  title: aiAnalysis.title,
+                  description: aiAnalysis.description,
+                  dueDate: aiAnalysis.dueDate,
+                  completed: false,
+                  category: 'email',
+                  sourceUrl: match.permalink || undefined,
+                  metadata: {
+                    channel: match.channel?.name,
+                    channelId: match.channel?.id,
+                    type: 'search',
+                    aiDetermined: true,
+                    originalText: text.substring(0, 200),
+                  },
+                },
+              });
+
+              totalItems++;
+            }
           }
         } else if (!searchData.ok) {
           console.error('Slack search API error:', searchData.error);
@@ -153,27 +163,37 @@ export async function POST(request: NextRequest) {
               continue;
             }
 
-            await prisma.task.create({
-              data: {
+            // Check if task already exists to prevent duplicates
+            const existingTask = await prisma.task.findFirst({
+              where: {
                 userId: user.id,
-                source: 'slack',
                 sourceId: messageId,
-                title: aiAnalysis.title,
-                description: aiAnalysis.description,
-                dueDate: aiAnalysis.dueDate,
-                completed: false,
-                category: 'email',
-                sourceUrl: item.message.permalink || undefined,
-                metadata: {
-                  channel: item.channel,
-                  type: 'starred',
-                  aiDetermined: true,
-                  originalText: text.substring(0, 200),
-                },
               },
             });
 
-            totalItems++;
+            if (!existingTask) {
+              await prisma.task.create({
+                data: {
+                  userId: user.id,
+                  source: 'slack',
+                  sourceId: messageId,
+                  title: aiAnalysis.title,
+                  description: aiAnalysis.description,
+                  dueDate: aiAnalysis.dueDate,
+                  completed: false,
+                  category: 'email',
+                  sourceUrl: item.message.permalink || undefined,
+                  metadata: {
+                    channel: item.channel,
+                    type: 'starred',
+                    aiDetermined: true,
+                    originalText: text.substring(0, 200),
+                  },
+                },
+              });
+
+              totalItems++;
+            }
           }
         }
       }
@@ -198,24 +218,36 @@ export async function POST(request: NextRequest) {
             // Only include reminders with due dates
             if (!dueDate) continue;
 
-            await prisma.task.create({
-              data: {
+            const reminderSourceId = `slack_reminder_${reminder.id}`;
+
+            // Check if task already exists to prevent duplicates
+            const existingTask = await prisma.task.findFirst({
+              where: {
                 userId: user.id,
-                source: 'slack',
-                sourceId: `slack_reminder_${reminder.id}`,
-                title: `🔔 ${reminder.text}`,
-                description: reminder.text,
-                dueDate: dueDate,
-                completed: false,
-                category: 'email',
-                metadata: {
-                  reminderId: reminder.id,
-                  type: 'reminder',
-                },
+                sourceId: reminderSourceId,
               },
             });
 
-            totalItems++;
+            if (!existingTask) {
+              await prisma.task.create({
+                data: {
+                  userId: user.id,
+                  source: 'slack',
+                  sourceId: reminderSourceId,
+                  title: `🔔 ${reminder.text}`,
+                  description: reminder.text,
+                  dueDate: dueDate,
+                  completed: false,
+                  category: 'email',
+                  metadata: {
+                    reminderId: reminder.id,
+                    type: 'reminder',
+                  },
+                },
+              });
+
+              totalItems++;
+            }
           }
         }
       }
