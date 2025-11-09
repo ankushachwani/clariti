@@ -50,67 +50,8 @@ export async function POST(request: NextRequest) {
 
     // Fetch user's messages and reminders
     try {
-      // Use search API to find user's own messages (works across all channels)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const dateStr = sevenDaysAgo.toISOString().split('T')[0]; // YYYY-MM-DD format
-      
-      const searchQuery = `from:me after:${dateStr}`;
-      const searchResponse = await fetch(
-        `https://slack.com/api/search.messages?query=${encodeURIComponent(searchQuery)}&count=100&sort=timestamp`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      const searchData = await searchResponse.json();
-      
-      if (searchData.ok && searchData.messages?.matches) {
-        for (const match of searchData.messages.matches) {
-          messagesScanned++;
-          
-          const text = match.text;
-          if (!text) continue;
-          
-          const timestamp = match.ts ? new Date(parseFloat(match.ts) * 1000) : new Date();
-          const channelName = match.channel?.name || 'unknown';
-          
-          // Use AI to analyze the message
-          const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, channelName);
-          
-          if (!aiAnalysis.isImportant) {
-            messagesFiltered++;
-            continue;
-          }
-
-          await prisma.task.create({
-            data: {
-              userId: user.id,
-              source: 'slack',
-              sourceId: `slack_search_${match.iid}`,
-              title: aiAnalysis.title,
-              description: aiAnalysis.description,
-              dueDate: aiAnalysis.dueDate,
-              completed: false,
-              category: 'email',
-              sourceUrl: match.permalink || undefined,
-              metadata: {
-                channel: channelName,
-                type: 'search',
-                aiDetermined: true,
-                originalText: text.substring(0, 200),
-              },
-            },
-          });
-
-          totalItems++;
-        }
-      }
-      
-      // Get starred items
-      const starsResponse = await fetch('https://slack.com/api/stars.list', {
+      // Get starred items (these are messages the user explicitly marked as important)
+      const starsResponse = await fetch('https://slack.com/api/stars.list?limit=100', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
