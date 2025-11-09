@@ -31,8 +31,11 @@ export async function POST(request: NextRequest) {
     // Check if Google is connected (for Gmail and Calendar)
     const googleAccount = user.accounts.find(acc => acc.provider === 'google');
     
+    console.log('Google account found:', !!googleAccount);
+    
     // Sync Gmail if Google is connected
     if (googleAccount) {
+      console.log('Syncing Gmail...');
       try {
         const response = await fetch(`${baseUrl}/api/integrations/gmail/sync`, {
           method: 'POST',
@@ -42,12 +45,14 @@ export async function POST(request: NextRequest) {
         });
 
         const data = await response.json();
+        console.log('Gmail sync result:', data);
         results.push({
           provider: 'gmail',
           success: response.ok,
           ...data,
         });
       } catch (error) {
+        console.error('Gmail sync error:', error);
         results.push({
           provider: 'gmail',
           success: false,

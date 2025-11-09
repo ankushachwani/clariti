@@ -31,6 +31,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Google not connected' }, { status: 400 });
     }
 
+    // Delete all existing Gmail tasks to avoid duplicates
+    await prisma.task.deleteMany({
+      where: {
+        userId: user.id,
+        source: 'gmail',
+      },
+    });
+
     let totalTasks = 0;
     let totalEvents = 0;
 
@@ -134,15 +142,6 @@ export async function POST(request: NextRequest) {
               category = 'assignment';
             }
 
-            // Check if task already exists
-            const existingTask = await prisma.task.findFirst({
-              where: {
-                userId: user.id,
-                source: 'gmail',
-                sourceId: message.id,
-              },
-            });
-
             const taskData = {
               title: `📧 ${subject}`,
               description: snippet,
@@ -158,60 +157,44 @@ export async function POST(request: NextRequest) {
               },
             };
 
-            if (!existingTask) {
-              await prisma.task.create({
-                data: {
-                  userId: user.id,
-                  source: 'gmail',
-                  sourceId: message.id,
-                  ...taskData,
-                },
-              });
+            await prisma.task.create({
+              data: {
+                userId: user.id,
+                source: 'gmail',
+                sourceId: message.id,
+                ...taskData,
+              },
+            });
 
-              totalTasks++;
+            totalTasks++;
 
-              // If it's a meeting/interview with a specific time, also create a calendar event
-              if (category === 'meeting' && dueDate) {
-                const eventTime = extractMeetingTime(fullContent, dueDate);
+            // If it's a meeting/interview with a specific time, also create a calendar event
+            if (category === 'meeting' && dueDate) {
+              const eventTime = extractMeetingTime(fullContent, dueDate);
+              
+              if (eventTime) {
+                const eventId = `gmail_meeting_${message.id}`;
                 
-                if (eventTime) {
-                  const eventId = `gmail_meeting_${message.id}`;
-                  const existingEvent = await prisma.task.findFirst({
-                    where: {
-                      userId: user.id,
-                      sourceId: eventId,
+                await prisma.task.create({
+                  data: {
+                    userId: user.id,
+                    title: `📅 ${subject}`,
+                    description: `Meeting from email: ${snippet}`,
+                    dueDate: eventTime,
+                    completed: false,
+                    category: 'meeting',
+                    source: 'gmail',
+                    sourceId: eventId,
+                    sourceUrl: `https://mail.google.com/mail/u/0/#inbox/${message.id}`,
+                    metadata: {
+                      from: from,
+                      linkedToEmail: message.id,
+                      type: 'meeting',
                     },
-                  });
-
-                  if (!existingEvent) {
-                    await prisma.task.create({
-                      data: {
-                        userId: user.id,
-                        title: `📅 ${subject}`,
-                        description: `Meeting from email: ${snippet}`,
-                        dueDate: eventTime,
-                        completed: false,
-                        category: 'meeting',
-                        source: 'gmail',
-                        sourceId: eventId,
-                        sourceUrl: `https://mail.google.com/mail/u/0/#inbox/${message.id}`,
-                        metadata: {
-                          from: from,
-                          linkedToEmail: message.id,
-                          type: 'meeting',
-                        },
-                      },
-                    });
-                    totalEvents++;
-                  }
-                }
+                  },
+                });
+                totalEvents++;
               }
-            } else {
-              // Update existing task if due date changed
-              await prisma.task.update({
-                where: { id: existingTask.id },
-                data: taskData,
-              });
             }
 
           } catch (msgError) {

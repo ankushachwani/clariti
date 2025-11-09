@@ -84,6 +84,9 @@ export async function POST(request: NextRequest) {
             processedItems.add(itemKey);
 
             const dueDate = assignment.due_at ? new Date(assignment.due_at) : null;
+            
+            // Skip assignments without due dates
+            if (!dueDate) continue;
 
             const taskData = {
               title: assignment.name,
@@ -189,6 +192,9 @@ export async function POST(request: NextRequest) {
             processedItems.add(itemKey);
 
             const dueDate = quiz.due_at ? new Date(quiz.due_at) : null;
+            
+            // Skip quizzes without due dates
+            if (!dueDate) continue;
 
             const taskData = {
               title: `📝 ${quiz.title}`,
@@ -242,6 +248,9 @@ export async function POST(request: NextRequest) {
             processedItems.add(itemKey);
 
             const dueDate = discussion.assignment?.due_at ? new Date(discussion.assignment.due_at) : null;
+            
+            // Skip discussions without due dates
+            if (!dueDate) continue;
 
             const taskData = {
               title: `💬 ${discussion.title}`,
