@@ -28,6 +28,10 @@ export async function POST(request: NextRequest) {
     const results: any[] = [];
     const baseUrl = process.env.NEXTAUTH_URL || 'https://clariti-ten.vercel.app';
 
+    console.log('=== SYNC-ALL STARTED ===');
+    console.log('User integrations:', user.integrations.map(i => ({ provider: i.provider, isConnected: i.isConnected })));
+    console.log('User accounts:', user.accounts.map(a => ({ provider: a.provider })));
+
     // Check if Google is connected (for Gmail and Calendar)
     const googleAccount = user.accounts.find(acc => acc.provider === 'google');
     
@@ -85,15 +89,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Sync each connected integration (Canvas, Slack, etc.)
+    console.log('Syncing integrations:', user.integrations.map(i => i.provider));
     for (const integration of user.integrations) {
       try {
         let syncUrl = '';
+        
+        console.log(`Processing integration: ${integration.provider}`);
         
         if (integration.provider === 'canvas') {
           syncUrl = `${baseUrl}/api/integrations/canvas/sync`;
         } else if (integration.provider === 'slack') {
           syncUrl = `${baseUrl}/api/integrations/slack/sync`;
+          console.log('Slack integration found - calling sync endpoint');
         } else {
+          console.log(`Skipping unsupported integration: ${integration.provider}`);
           continue; // Skip unsupported integrations
         }
 
@@ -105,12 +114,14 @@ export async function POST(request: NextRequest) {
         });
 
         const data = await response.json();
+        console.log(`${integration.provider} sync result:`, { success: response.ok, data });
         results.push({
           provider: integration.provider,
           success: response.ok,
           ...data,
         });
       } catch (error) {
+        console.error(`${integration.provider} sync error:`, error);
         results.push({
           provider: integration.provider,
           success: false,
@@ -118,6 +129,9 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
+    console.log('=== SYNC-ALL COMPLETE ===');
+    console.log('Results:', results);
 
     return NextResponse.json({
       success: true,
