@@ -60,7 +60,17 @@ export async function GET(request: NextRequest) {
       throw new Error(tokenData.error || 'Failed to get Slack access token');
     }
 
-    const { access_token, team, authed_user } = tokenData;
+    const { team, authed_user } = tokenData;
+
+    // For user scopes, the token is in authed_user.access_token (not top-level access_token)
+    const userAccessToken = authed_user?.access_token;
+
+    if (!userAccessToken) {
+      console.error('No user access token in response:', tokenData);
+      throw new Error('Failed to get user access token');
+    }
+
+    console.log('Slack OAuth success - User token obtained:', userAccessToken.substring(0, 10) + '...');
 
     // Get user from database
     const dbUser = await prisma.user.findUnique({
@@ -83,20 +93,22 @@ export async function GET(request: NextRequest) {
         userId: dbUser.id,
         provider: 'slack',
         isConnected: true,
-        accessToken: access_token,
+        accessToken: userAccessToken,
         metadata: {
           teamId: team.id,
           teamName: team.name,
           userId: authed_user.id,
+          scopes: authed_user.scope,
         },
       },
       update: {
         isConnected: true,
-        accessToken: access_token,
+        accessToken: userAccessToken,
         metadata: {
           teamId: team.id,
           teamName: team.name,
           userId: authed_user.id,
+          scopes: authed_user.scope,
         },
         lastSyncedAt: new Date(),
       },
