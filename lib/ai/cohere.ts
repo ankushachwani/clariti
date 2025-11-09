@@ -134,3 +134,50 @@ export async function generateDailyMotivation(): Promise<string> {
 
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
+
+export async function prioritizeTask(task: any): Promise<{
+  priority: number;
+  urgencyScore: number;
+  reasoning: string;
+}> {
+  return calculatePriorityScore({
+    title: task.title,
+    description: task.description,
+    dueDate: task.dueDate,
+    course: task.course,
+    source: task.source,
+  });
+}
+
+export async function generateWorkRoadmap(tasks: any[]): Promise<string> {
+  try {
+    if (tasks.length === 0) {
+      return "You're all caught up! No urgent tasks at the moment. Great job staying on top of things! 🎉";
+    }
+
+    const taskList = tasks.map((task, index) => {
+      const daysUntil = task.dueDate 
+        ? Math.ceil((new Date(task.dueDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : 'No deadline';
+      return `${index + 1}. ${task.title} (Due: ${daysUntil === 'No deadline' ? daysUntil : `${daysUntil} days`})`;
+    }).join('\n');
+
+    const prompt = `You are a productivity coach for a college student. Based on these upcoming tasks, provide a brief, motivating roadmap (2-3 sentences) on how to tackle their work efficiently:
+
+${taskList}
+
+Provide practical advice on prioritization and time management. Keep it concise, actionable, and motivating.`;
+
+    const response = await cohere.generate({
+      model: 'command',
+      prompt: prompt,
+      maxTokens: 150,
+      temperature: 0.7,
+    });
+
+    return response.generations[0].text.trim();
+  } catch (error) {
+    console.error('Cohere roadmap generation error:', error);
+    return "Focus on your highest priority tasks first. Break them down into smaller chunks, and tackle them one at a time. You've got this!";
+  }
+}

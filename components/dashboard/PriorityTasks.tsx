@@ -65,16 +65,24 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-        Priority Tasks
+        📌 Top Priority Tasks
       </h2>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Prioritized by AI based on deadlines and importance
+      </p>
 
       <div className="space-y-3">
-        {tasks.map((task) => (
+        {tasks.map((task, index) => (
           <div
             key={task.id}
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="flex items-start space-x-3">
+              {/* Priority Number */}
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                {index + 1}
+              </div>
+
               <button
                 onClick={() => handleToggleComplete(task.id, task.completed)}
                 className="mt-1 flex-shrink-0"

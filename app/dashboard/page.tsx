@@ -3,10 +3,12 @@ import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth/auth-options';
 import prisma from '@/lib/prisma';
 import { getGreeting } from '@/lib/utils/date-utils';
-import { generateDailyMotivation } from '@/lib/ai/cohere';
+import { generateDailyMotivation, generateWorkRoadmap } from '@/lib/ai/cohere';
 import DailyBrief from '@/components/dashboard/DailyBrief';
 import PriorityTasks from '@/components/dashboard/PriorityTasks';
 import Navbar from '@/components/layout/Navbar';
+
+export const revalidate = 0; // Disable caching for real-time data
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -17,22 +19,32 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email! },
-    include: {
-      tasks: {
-        where: {
-          completed: false,
-        },
-        orderBy: {
-          priority: 'desc',
-        },
-        take: 10,
-      },
-    },
   });
 
   if (!user) {
     redirect('/');
   }
+
+  // Get priority tasks (top 10, sorted by priority and urgency)
+  const now = new Date();
+  const priorityTasks = await prisma.task.findMany({
+    where: {
+      userId: user.id,
+      completed: false,
+      dueDate: {
+        gte: now,
+      },
+    },
+    orderBy: [
+      { priority: 'desc' },
+      { urgencyScore: 'desc' },
+      { dueDate: 'asc' },
+    ],
+    take: 10,
+  });
+
+  // Generate AI roadmap for top 5 tasks
+  const roadmap = await generateWorkRoadmap(priorityTasks.slice(0, 5));
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -86,7 +98,18 @@ export default async function DashboardPage() {
           completionPercentage={completionPercentage}
         />
 
-        <PriorityTasks tasks={user.tasks} />
+        {/* AI Roadmap Summary */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6 mb-8 border border-blue-200 dark:border-gray-600">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <span className="mr-2">🎯</span>
+            Your Roadmap for Success
+          </h2>
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            {roadmap}
+          </p>
+        </div>
+
+        <PriorityTasks tasks={priorityTasks} />
       </main>
     </>
   );
