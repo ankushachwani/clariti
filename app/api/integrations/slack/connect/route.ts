@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     'users:read.email',
     'im:history',
     'im:read',
+    'search:read', // Required to search user's messages
   ].join(',');
 
   // Build Slack OAuth authorization URL

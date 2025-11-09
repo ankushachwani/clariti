@@ -50,147 +50,63 @@ export async function POST(request: NextRequest) {
 
     // Fetch user's messages and reminders
     try {
-      // First, get the authenticated user's info
-      const authResponse = await fetch('https://slack.com/api/auth.test', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
+      const sevenDaysAgo = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
       
-      const authData = await authResponse.json();
-      console.log('Auth test:', { ok: authData.ok, user_id: authData.user_id, error: authData.error });
-      
-      if (!authData.ok) {
-        console.error('Slack auth failed:', authData.error);
-        return NextResponse.json({ 
-          error: `Slack authentication failed: ${authData.error}`,
-        }, { status: 400 });
-      }
-
-      // Get recent messages from channels the user is in (past 7 days)
-      console.log('Calling Slack users.conversations API...');
-      const userInfoResponse = await fetch('https://slack.com/api/users.conversations?types=public_channel,private_channel&exclude_archived=true&limit=20', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
-
-      console.log('Slack users.conversations status:', userInfoResponse.status);
-      
-      const channelsData = await userInfoResponse.json();
-      console.log('Slack users.conversations full response:', JSON.stringify(channelsData, null, 2));
-
-      if (userInfoResponse.ok) {
-        
-        console.log('Slack channels response:', { ok: channelsData.ok, channelCount: channelsData.channels?.length, error: channelsData.error });
-        
-        if (!channelsData.ok) {
-          console.error('Slack API error:', channelsData.error);
-          return NextResponse.json({ 
-            error: `Slack API error: ${channelsData.error}`,
-            details: channelsData 
-          }, { status: 400 });
+      // Use search API to find user's own messages (works across all channels)
+      const searchQuery = `from:me after:${sevenDaysAgo}`;
+      const searchResponse = await fetch(
+        `https://slack.com/api/search.messages?query=${encodeURIComponent(searchQuery)}&count=100&sort=timestamp`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
         }
-        
-        if (channelsData.ok && channelsData.channels) {
-          const sevenDaysAgo = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
+      );
+
+      const searchData = await searchResponse.json();
+      
+      if (searchData.ok && searchData.messages?.matches) {
+        for (const match of searchData.messages.matches) {
+          messagesScanned++;
           
-          console.log(`Processing ${channelsData.channels.length} channels (up to 5)`);
+          const text = match.text;
+          if (!text) continue;
           
-          // Process up to 5 channels to avoid rate limits
-          for (const channel of channelsData.channels.slice(0, 5)) {
-            try {
-              console.log(`Fetching messages from channel: ${channel.name || channel.id}`);
-              
-              // Get messages from this channel
-              const messagesResponse = await fetch(
-                `https://slack.com/api/conversations.history?channel=${channel.id}&oldest=${sevenDaysAgo}&limit=50`,
-                {
-                  headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                  },
-                }
-              );
-
-              if (!messagesResponse.ok) {
-                console.log(`Failed to fetch messages from ${channel.name}:`, messagesResponse.status);
-                continue;
-              }
-
-              const messagesData = await messagesResponse.json();
-              
-              console.log(`Channel ${channel.name || channel.id} response:`, { 
-                ok: messagesData.ok, 
-                messageCount: messagesData.messages?.length, 
-                error: messagesData.error,
-                warning: messagesData.warning 
-              });
-              
-              if (!messagesData.ok) {
-                console.error(`Channel ${channel.name || channel.id} error:`, messagesData.error);
-                continue;
-              }
-              
-              if (messagesData.ok && messagesData.messages) {
-                for (const message of messagesData.messages) {
-                  messagesScanned++;
-                  
-                  // Skip messages without text or from bots
-                  if (!message.text || message.bot_id) {
-                    console.log(`Skipping message: ${message.bot_id ? 'bot message' : 'no text'}`);
-                    continue;
-                  }
-
-                  const text = message.text;
-                  const timestamp = message.ts ? new Date(parseFloat(message.ts) * 1000) : new Date();
-                  
-                  console.log(`Analyzing message: "${text.substring(0, 100)}..."`);
-                  
-                  // Use AI to analyze the message
-                  const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, channel.name);
-                  
-                  console.log(`AI result for "${text.substring(0, 50)}":`, { isImportant: aiAnalysis.isImportant, title: aiAnalysis.title, dueDate: aiAnalysis.dueDate });
-                  
-                  if (!aiAnalysis.isImportant) {
-                    messagesFiltered++;
-                    console.log(`Filtered out Slack message: "${text.substring(0, 50)}..." (not important)`);
-                    continue;
-                  }
-
-                  const sourceId = `slack_msg_${message.ts}`;
-
-                  console.log(`Creating task from Slack message: "${aiAnalysis.title}"`);
-
-                  await prisma.task.create({
-                    data: {
-                      userId: user.id,
-                      source: 'slack',
-                      sourceId: sourceId,
-                      title: aiAnalysis.title,
-                      description: aiAnalysis.description,
-                      dueDate: aiAnalysis.dueDate,
-                      completed: false,
-                      category: 'email',
-                      sourceUrl: undefined,
-                      metadata: {
-                        channel: channel.name,
-                        type: 'message',
-                        aiDetermined: true,
-                        originalText: text.substring(0, 200),
-                      },
-                    },
-                  });
-
-                  totalItems++;
-                }
-              }
-            } catch (channelError) {
-              console.error(`Error processing channel ${channel.id}:`, channelError);
-            }
+          const timestamp = match.ts ? new Date(parseFloat(match.ts) * 1000) : new Date();
+          const channelName = match.channel?.name || 'unknown';
+          
+          // Use AI to analyze the message
+          const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, channelName);
+          
+          if (!aiAnalysis.isImportant) {
+            messagesFiltered++;
+            continue;
           }
+
+          await prisma.task.create({
+            data: {
+              userId: user.id,
+              source: 'slack',
+              sourceId: `slack_search_${match.iid}`,
+              title: aiAnalysis.title,
+              description: aiAnalysis.description,
+              dueDate: aiAnalysis.dueDate,
+              completed: false,
+              category: 'email',
+              sourceUrl: match.permalink || undefined,
+              metadata: {
+                channel: channelName,
+                type: 'search',
+                aiDetermined: true,
+                originalText: text.substring(0, 200),
+              },
+            },
+          });
+
+          totalItems++;
         }
       }
-
+      
       // Get starred items
       const starsResponse = await fetch('https://slack.com/api/stars.list', {
         headers: {
