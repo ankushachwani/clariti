@@ -161,7 +161,7 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      const response = await fetch('/api/integrations/sync', {
+      const response = await fetch('/api/integrations/sync-all', {
         method: 'POST',
       });
 

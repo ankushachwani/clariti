@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
         integrations: {
           where: { isConnected: true },
         },
+        accounts: true, // Get OAuth accounts too
       },
     });
 
@@ -27,17 +28,64 @@ export async function POST(request: NextRequest) {
     const results: any[] = [];
     const baseUrl = process.env.NEXTAUTH_URL || 'https://clariti-ten.vercel.app';
 
-    // Sync each connected integration
+    // Check if Google is connected (for Gmail and Calendar)
+    const googleAccount = user.accounts.find(acc => acc.provider === 'google');
+    
+    // Sync Gmail if Google is connected
+    if (googleAccount) {
+      try {
+        const response = await fetch(`${baseUrl}/api/integrations/gmail/sync`, {
+          method: 'POST',
+          headers: {
+            'Cookie': request.headers.get('cookie') || '',
+          },
+        });
+
+        const data = await response.json();
+        results.push({
+          provider: 'gmail',
+          success: response.ok,
+          ...data,
+        });
+      } catch (error) {
+        results.push({
+          provider: 'gmail',
+          success: false,
+          error: String(error),
+        });
+      }
+
+      // Sync Google Calendar if Google is connected
+      try {
+        const response = await fetch(`${baseUrl}/api/integrations/calendar/sync`, {
+          method: 'POST',
+          headers: {
+            'Cookie': request.headers.get('cookie') || '',
+          },
+        });
+
+        const data = await response.json();
+        results.push({
+          provider: 'google_calendar',
+          success: response.ok,
+          ...data,
+        });
+      } catch (error) {
+        results.push({
+          provider: 'google_calendar',
+          success: false,
+          error: String(error),
+        });
+      }
+    }
+
+    // Sync each connected integration (Canvas, Slack, etc.)
     for (const integration of user.integrations) {
       try {
         let syncUrl = '';
         
         if (integration.provider === 'canvas') {
           syncUrl = `${baseUrl}/api/integrations/canvas/sync`;
-        } else if (integration.provider === 'gmail') {
-          syncUrl = `${baseUrl}/api/integrations/gmail/sync`;
-        } else if (integration.provider === 'google_calendar') {
-          syncUrl = `${baseUrl}/api/integrations/calendar/sync`;
         } else {
           continue; // Skip unsupported integrations
         }
