@@ -100,7 +100,7 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
           </div>
           <button
             onClick={handleSendTestEmail}
-            disabled={sendingTest || !settings?.emailNotifications}
+            disabled={sendingTest}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold transition-all shadow-md hover:shadow-lg whitespace-nowrap"
           >
             {sendingTest ? (
@@ -126,12 +126,6 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
           }`}>
             {testEmailMessage.text}
           </div>
-        )}
-
-        {!settings?.emailNotifications && (
-          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 italic">
-            💡 Enable "Email Notifications" below to send test emails
-          </p>
         )}
       </div>
 
