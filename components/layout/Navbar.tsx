@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, CheckSquare, Calendar, User, LogOut } from 'lucide-react';
+import { Home, CheckSquare, Calendar, User, LogOut, Megaphone } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
 export default function Navbar() {
@@ -14,6 +14,7 @@ export default function Navbar() {
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Dashboard' },
     { href: '/tasks', icon: CheckSquare, label: 'Tasks' },
+    { href: '/announcements', icon: Megaphone, label: 'Announcements' },
     { href: '/calendar', icon: Calendar, label: 'Calendar' },
     { href: '/profile', icon: User, label: 'Profile' },
   ];

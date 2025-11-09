@@ -33,6 +33,9 @@ export default async function DashboardPage() {
     where: {
       userId: user.id,
       completed: false,
+      category: {
+        not: 'announcement', // Exclude announcements from priority tasks
+      },
       dueDate: {
         gte: now,
       },
@@ -56,6 +59,9 @@ export default async function DashboardPage() {
   const tasksDueToday = await prisma.task.findMany({
     where: {
       userId: user.id,
+      category: {
+        not: 'announcement',
+      },
       dueDate: {
         gte: today,
         lt: tomorrow,
@@ -66,6 +72,9 @@ export default async function DashboardPage() {
   const tasksCompletedToday = await prisma.task.findMany({
     where: {
       userId: user.id,
+      category: {
+        not: 'announcement',
+      },
       completedAt: {
         gte: today,
         lt: tomorrow,
