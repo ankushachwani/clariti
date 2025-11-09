@@ -42,6 +42,25 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
     return textarea.value.replace(/\s+/g, ' ').trim();
   };
 
+  const getCategoryBadge = (category: string) => {
+    switch (category) {
+      case 'assignment':
+        return { label: 'Assignment', icon: '📚', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' };
+      case 'announcement':
+        return { label: 'Announcement', icon: '📢', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' };
+      case 'quiz':
+        return { label: 'Quiz', icon: '📝', color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' };
+      case 'discussion':
+        return { label: 'Discussion', icon: '💬', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' };
+      case 'meeting':
+        return { label: 'Meeting', icon: '📅', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400' };
+      case 'email':
+        return { label: 'Email', icon: '📧', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400' };
+      default:
+        return { label: 'Task', icon: '✓', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400' };
+    }
+  };
+
   const filteredTasks = useMemo(() => {
     let filtered = tasks;
 
@@ -303,6 +322,9 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                               {getUrgencyLabel(new Date(task.dueDate))}
                             </span>
                           )}
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${getCategoryBadge(task.category).color}`}>
+                            {getCategoryBadge(task.category).icon} {getCategoryBadge(task.category).label}
+                          </span>
                           <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
                             {task.source}
                           </span>
@@ -385,6 +407,9 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                         </div>
 
                         <div className="flex items-center gap-4 mt-2 flex-wrap text-sm text-gray-600 dark:text-gray-400">
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${getCategoryBadge(task.category).color}`}>
+                            {getCategoryBadge(task.category).icon} {getCategoryBadge(task.category).label}
+                          </span>
                           <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
                             {task.source}
                           </span>
