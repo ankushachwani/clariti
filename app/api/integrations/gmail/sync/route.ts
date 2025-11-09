@@ -340,32 +340,34 @@ async function analyzeEmailWithAI(
     
     const prompt = `Today's date is ${currentDate}.
 
-Analyze this email and determine if it's an ACTIONABLE TASK or just an announcement/notification.
+Analyze this email and determine if it's important for a STUDENT/PROFESSIONAL.
 
 Subject: ${subject}
 Content: ${snippet.substring(0, 500)}
 
-CRITICAL: Only mark isImportant=true if this requires the user to DO SOMETHING with a deadline.
+Mark isImportant=TRUE for:
+- Assignments, homework, projects (even without explicit deadline if from professor/instructor)
+- Quizzes, exams, tests
+- Meetings, interviews, office hours
+- Important announcements from professors/instructors
+- Graded work, feedback
+- Bills with payment due dates
+- Job applications, interviews
+- Items saying "action required", "please submit", "due by"
+- Course material, required readings
+- Important emails from .edu domains
+- Work-related tasks and deadlines
 
-Mark isImportant=FALSE for:
-- Birthdays, celebrations, personal events (e.g., "Brady's Bday", "John's birthday party")
-- Credit card/bank statements that are just informational (e.g., "Your statement is available" with no payment due)
-- Marketing, promotions, newsletters
-- Social media notifications, updates
-- FYI announcements with no action needed
-- Class cancelled notices
-- General updates or news
-- Confirmations of already-completed actions
+Mark isImportant=FALSE only for:
+- Birthdays, celebrations, personal social events
+- Credit card statements (unless payment due soon)
+- Marketing emails, promotions
+- Social media notifications
+- Spam, newsletters
+- Deployment notifications (Vercel, GitHub)
+- Corporate AGM/EGM notices
 
-Mark isImportant=TRUE only for:
-- Assignments, homework, projects WITH a deadline
-- Quizzes, exams, tests WITH a specific date
-- Meetings, interviews WITH a time you must attend
-- Bills with payment due dates requiring action
-- Items explicitly saying "action required", "please submit", "due by"
-- Things you need to complete, attend, or respond to
-
-If isImportant=true, rewrite the title to be clear and actionable (remove "Re:", "Fwd:", email fluff).
+If isImportant=true, rewrite the title to be clear and actionable (remove "Re:", "Fwd:", make it concise).
 
 Respond with ONLY a JSON object (no markdown):
 {
