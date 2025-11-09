@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Slack OAuth scopes (user scopes)
-  const scopes = [
+  const userScopes = [
     'channels:history',
     'channels:read',
     'groups:history',
@@ -26,16 +26,16 @@ export async function GET(request: NextRequest) {
     'users:read',
     'im:history',
     'im:read',
-    'stars:read', // Read starred/saved items
+    'search:read', // Search messages across workspace
+    'stars:read', // Read starred/saved messages
   ].join(',');
 
   // Build Slack OAuth authorization URL
   const authUrl = new URL('https://slack.com/oauth/v2/authorize');
   authUrl.searchParams.append('client_id', clientId);
-  authUrl.searchParams.append('scope', scopes);
+  authUrl.searchParams.append('user_scope', userScopes); // CRITICAL: use user_scope for user tokens
   authUrl.searchParams.append('redirect_uri', redirectUri);
   authUrl.searchParams.append('state', state);
-  authUrl.searchParams.append('granular_bot_scope', '1'); // Prevent desktop app launch
 
   return NextResponse.redirect(authUrl.toString());
 }

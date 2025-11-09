@@ -48,9 +48,78 @@ export async function POST(request: NextRequest) {
 
     console.log('Starting Slack sync...');
 
+    // Track processed message IDs to avoid duplicates
+    const processedMessageIds = new Set<string>();
+
     // Fetch user's messages and reminders
     try {
-      // Get starred items (these are messages the user explicitly marked as important)
+      // 1. Search for user's recent messages (now that we have search:read scope!)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const dateStr = sevenDaysAgo.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      const searchResponse = await fetch(
+        `https://slack.com/api/search.messages?query=from:me after:${dateStr}&count=100&sort=timestamp&sort_dir=desc`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        
+        if (searchData.ok && searchData.messages?.matches) {
+          messagesScanned += searchData.messages.matches.length;
+          
+          for (const match of searchData.messages.matches) {
+            const text = match.text;
+            const timestamp = match.ts ? new Date(parseFloat(match.ts) * 1000) : new Date();
+            const messageId = `slack_search_${match.ts}_${match.channel?.id}`;
+            
+            // Skip if already processed
+            if (processedMessageIds.has(messageId)) continue;
+            processedMessageIds.add(messageId);
+            
+            // Use AI to analyze the message
+            const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, match.channel?.name);
+            
+            if (!aiAnalysis.isImportant) {
+              console.log(`Filtered out Slack message: "${text.substring(0, 50)}..." (not important)`);
+              messagesFiltered++;
+              continue;
+            }
+
+            await prisma.task.create({
+              data: {
+                userId: user.id,
+                source: 'slack',
+                sourceId: messageId,
+                title: aiAnalysis.title,
+                description: aiAnalysis.description,
+                dueDate: aiAnalysis.dueDate,
+                completed: false,
+                category: 'email',
+                sourceUrl: match.permalink || undefined,
+                metadata: {
+                  channel: match.channel?.name,
+                  channelId: match.channel?.id,
+                  type: 'search',
+                  aiDetermined: true,
+                  originalText: text.substring(0, 200),
+                },
+              },
+            });
+
+            totalItems++;
+          }
+        } else if (!searchData.ok) {
+          console.error('Slack search API error:', searchData.error);
+        }
+      }
+
+      // 2. Get starred items (these are messages the user explicitly marked as important)
       const starsResponse = await fetch('https://slack.com/api/stars.list?limit=100', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -67,22 +136,28 @@ export async function POST(request: NextRequest) {
 
             const text = item.message.text;
             const timestamp = item.message.ts ? new Date(parseFloat(item.message.ts) * 1000) : new Date();
+            const messageId = `slack_star_${item.message.ts || item.date_create}`;
+            
+            // Skip if already processed (might be in search results too)
+            if (processedMessageIds.has(messageId)) continue;
+            processedMessageIds.add(messageId);
+            
+            messagesScanned++;
             
             // Use AI to analyze the message
             const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, 'starred');
             
             if (!aiAnalysis.isImportant) {
               console.log(`Filtered out starred Slack message: "${text.substring(0, 50)}..." (not important)`);
+              messagesFiltered++;
               continue;
             }
-
-            const sourceId = `slack_star_${item.message.ts || item.date_create}`;
 
             await prisma.task.create({
               data: {
                 userId: user.id,
                 source: 'slack',
-                sourceId: sourceId,
+                sourceId: messageId,
                 title: aiAnalysis.title,
                 description: aiAnalysis.description,
                 dueDate: aiAnalysis.dueDate,
