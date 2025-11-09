@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Mail, Send } from 'lucide-react';
 
 interface NotificationSettingsProps {
   settings: any;
@@ -10,6 +10,8 @@ interface NotificationSettingsProps {
 export default function NotificationSettings({ settings: initialSettings }: NotificationSettingsProps) {
   const [settings, setSettings] = useState(initialSettings);
   const [saving, setSaving] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testEmailMessage, setTestEmailMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleToggle = async (key: string, value: boolean) => {
     setSettings({ ...settings, [key]: value });
@@ -45,6 +47,31 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
       }
     } catch (error) {
       console.error('Error updating daily brief time:', error);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    setSendingTest(true);
+    setTestEmailMessage(null);
+
+    try {
+      const response = await fetch('/api/user/test-email', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setTestEmailMessage({ type: 'success', text: '✓ Test email sent! Check your inbox.' });
+      } else {
+        setTestEmailMessage({ type: 'error', text: data.error || 'Failed to send test email' });
+      }
+    } catch (error) {
+      setTestEmailMessage({ type: 'error', text: 'Failed to send test email. Please try again.' });
+    } finally {
+      setSendingTest(false);
+      // Clear message after 5 seconds
+      setTimeout(() => setTestEmailMessage(null), 5000);
     }
   };
 
@@ -156,6 +183,53 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
           </label>
         </div>
+
+        {/* Test Email Button */}
+        {settings?.emailNotifications && settings?.dailyBrief && (
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                    Test Email
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Send a test daily debrief email to see how it looks
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleSendTestEmail}
+                disabled={sendingTest}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                {sendingTest ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send Test
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {/* Test Email Message */}
+            {testEmailMessage && (
+              <div className={`mt-4 p-3 rounded-lg text-sm ${
+                testEmailMessage.type === 'success' 
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
+              }`}>
+                {testEmailMessage.text}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

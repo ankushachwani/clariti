@@ -56,13 +56,22 @@ Add this to your `vercel.json`:
     },
     {
       "path": "/api/cron/daily-digest",
-      "schedule": "0 8 * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }
 ```
 
-This will send daily digest emails at 8 AM UTC (adjust as needed).
+The daily digest cron runs **every hour** and checks each user's preferred time setting. Users can set their preferred time in **Profile → Notifications → Daily Brief Time**.
+
+## How It Works
+
+1. User enables "Daily Brief" and "Email Notifications" in their profile
+2. User selects their preferred time (e.g., 8:00 AM)
+3. The cron job runs every hour
+4. It checks each user's timezone and preferred time
+5. If it matches the current hour in their timezone, it sends the email
+6. Email includes top priority tasks with urgency indicators
 
 ## Available Email Functions
 

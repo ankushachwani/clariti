@@ -7,6 +7,7 @@ import { generateDailyMotivation, generateWorkRoadmap } from '@/lib/ai/cohere';
 import DailyBrief from '@/components/dashboard/DailyBrief';
 import PriorityTasks from '@/components/dashboard/PriorityTasks';
 import SyncButton from '@/components/dashboard/SyncButton';
+import Chatbot from '@/components/dashboard/Chatbot';
 import Navbar from '@/components/layout/Navbar';
 
 export const revalidate = 0; // Disable caching for real-time data
@@ -124,6 +125,11 @@ export default async function DashboardPage() {
         </div>
 
         <PriorityTasks tasks={priorityTasks} />
+
+        {/* AI Chatbot */}
+        <div className="mt-8">
+          <Chatbot />
+        </div>
       </main>
     </>
   );

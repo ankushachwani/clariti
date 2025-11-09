@@ -1,7 +1,14 @@
 import { format, isToday, isTomorrow, isThisWeek, isPast, differenceInDays } from 'date-fns';
 
 export function getGreeting(timezone: string = 'America/New_York'): string {
-  const hour = new Date().getHours();
+  // Get the current time in the user's timezone
+  const userTime = new Date().toLocaleString('en-US', { 
+    timeZone: timezone,
+    hour12: false,
+    hour: 'numeric'
+  });
+  
+  const hour = parseInt(userTime);
 
   if (hour < 12) return 'Good morning';
   if (hour < 18) return 'Good afternoon';
