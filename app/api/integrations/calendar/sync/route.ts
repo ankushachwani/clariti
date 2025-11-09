@@ -66,14 +66,20 @@ export async function POST(request: NextRequest) {
         // Hard filter: Immediately reject obvious personal events
         const lowerTitle = title.toLowerCase();
         const lowerDesc = description.toLowerCase();
-        if (
+        
+        // Check for birthday patterns
+        const isBirthday = 
           lowerTitle.includes('birthday') ||
           lowerTitle.includes('bday') ||
           lowerTitle.includes('b-day') ||
-          lowerTitle.includes('bday') ||
-          lowerTitle.match(/\b\w+\'s\s+b.*day/i) || // Matches "Brady's Bday", "John's Birthday", etc
+          lowerTitle.includes("'s bday") ||
+          lowerTitle.includes("'s birthday") ||
+          lowerTitle.match(/\bb\s?day\b/i) ||
           lowerDesc.includes('birthday') ||
-          lowerDesc.includes('bday') ||
+          lowerDesc.includes('bday');
+          
+        if (
+          isBirthday ||
           lowerTitle.includes('anniversary') ||
           lowerTitle.includes('party') ||
           lowerTitle.includes('celebration') ||

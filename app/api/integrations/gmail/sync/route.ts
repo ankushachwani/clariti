@@ -176,31 +176,53 @@ export async function POST(request: NextRequest) {
             const snippet = messageData.snippet || emailBody.substring(0, 500);
             const fullContent = subject + ' ' + emailBody;
 
-            // Hard filter: Immediately reject obvious personal items
+            // Hard filter: Immediately reject obvious personal/non-actionable items
             const lowerSubject = subject.toLowerCase();
             const lowerContent = fullContent.toLowerCase();
             
             if (
+              // Birthdays and celebrations
               lowerSubject.includes('birthday') ||
               lowerSubject.includes('bday') ||
               lowerSubject.includes('b-day') ||
+              lowerSubject.includes("'s bday") ||
               lowerContent.includes('happy birthday') ||
+              
+              // Statements (unless payment due)
               lowerSubject.includes('statement is available') ||
               lowerSubject.includes('statement is ready') ||
               lowerSubject.includes('your statement') ||
               lowerContent.includes('statement is available') ||
-              lowerContent.includes('view statement') && lowerContent.includes('balance') ||
+              (lowerContent.includes('view statement') && lowerContent.includes('balance')) ||
               lowerSubject.includes('credit card statement') ||
               lowerSubject.includes('bank statement') ||
               (lowerSubject.includes('statement') && !lowerContent.includes('payment due') && !lowerContent.includes('due date')) ||
               (lowerSubject.includes('credit card') && !lowerContent.includes('payment due') && !lowerContent.includes('due date')) ||
+              
+              // Deployment notifications (Vercel, GitHub, etc.)
+              lowerSubject.includes('failed production deployment') ||
+              lowerSubject.includes('deployment failed') ||
+              lowerSubject.includes('deployment succeeded') ||
+              lowerSubject.includes('build failed') ||
+              lowerSubject.includes('build succeeded') ||
+              lowerSubject.match(/\[.*\]\s+run\s+(failed|succeeded)/i) ||
+              (from.includes('vercel') && !lowerSubject.includes('invoice') && !lowerSubject.includes('payment')) ||
+              
+              // Corporate announcements / AGM / EGM notices
+              lowerSubject.includes('extraordinary general meeting') ||
+              lowerSubject.includes('annual general meeting') ||
+              lowerSubject.includes('egm') && lowerSubject.includes('notice') ||
+              lowerSubject.includes('agm') && lowerSubject.includes('notice') ||
+              lowerSubject.includes('_folio_dpid_clid') ||
+              
+              // Marketing
               lowerSubject.includes('promotional') ||
               lowerSubject.includes('newsletter') ||
               lowerSubject.includes('unsubscribe') ||
               lowerContent.includes('minimum payment due') && !lowerContent.includes('action required')
             ) {
               filteredOut++;
-              console.log(`Hard filtered email: "${subject}" (obvious personal/promotional)`);
+              console.log(`Hard filtered email: "${subject}" (obvious personal/promotional/notification)`);
               continue;
             }
 
