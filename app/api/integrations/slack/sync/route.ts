@@ -43,6 +43,10 @@ export async function POST(request: NextRequest) {
 
     const accessToken = integration.accessToken;
     let totalItems = 0;
+    let messagesScanned = 0;
+    let messagesFiltered = 0;
+
+    console.log('Starting Slack sync...');
 
     // Fetch user's messages and reminders
     try {
@@ -53,15 +57,23 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      console.log('Slack users.conversations status:', userInfoResponse.status);
+
       if (userInfoResponse.ok) {
         const channelsData = await userInfoResponse.json();
+        
+        console.log('Slack channels response:', { ok: channelsData.ok, channelCount: channelsData.channels?.length, error: channelsData.error });
         
         if (channelsData.ok && channelsData.channels) {
           const sevenDaysAgo = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
           
+          console.log(`Processing ${channelsData.channels.length} channels (up to 5)`);
+          
           // Process up to 5 channels to avoid rate limits
           for (const channel of channelsData.channels.slice(0, 5)) {
             try {
+              console.log(`Fetching messages from channel: ${channel.name || channel.id}`);
+              
               // Get messages from this channel
               const messagesResponse = await fetch(
                 `https://slack.com/api/conversations.history?channel=${channel.id}&oldest=${sevenDaysAgo}&limit=50`,
@@ -72,27 +84,44 @@ export async function POST(request: NextRequest) {
                 }
               );
 
-              if (!messagesResponse.ok) continue;
+              if (!messagesResponse.ok) {
+                console.log(`Failed to fetch messages from ${channel.name}:`, messagesResponse.status);
+                continue;
+              }
 
               const messagesData = await messagesResponse.json();
               
+              console.log(`Channel ${channel.name} response:`, { ok: messagesData.ok, messageCount: messagesData.messages?.length, error: messagesData.error });
+              
               if (messagesData.ok && messagesData.messages) {
                 for (const message of messagesData.messages) {
+                  messagesScanned++;
+                  
                   // Skip messages without text or from bots
-                  if (!message.text || message.bot_id) continue;
+                  if (!message.text || message.bot_id) {
+                    console.log(`Skipping message: ${message.bot_id ? 'bot message' : 'no text'}`);
+                    continue;
+                  }
 
                   const text = message.text;
                   const timestamp = message.ts ? new Date(parseFloat(message.ts) * 1000) : new Date();
                   
+                  console.log(`Analyzing message: "${text.substring(0, 100)}..."`);
+                  
                   // Use AI to analyze the message
                   const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, channel.name);
                   
+                  console.log(`AI result for "${text.substring(0, 50)}":`, { isImportant: aiAnalysis.isImportant, title: aiAnalysis.title, dueDate: aiAnalysis.dueDate });
+                  
                   if (!aiAnalysis.isImportant) {
+                    messagesFiltered++;
                     console.log(`Filtered out Slack message: "${text.substring(0, 50)}..." (not important)`);
                     continue;
                   }
 
                   const sourceId = `slack_msg_${message.ts}`;
+
+                  console.log(`Creating task from Slack message: "${aiAnalysis.title}"`);
 
                   await prisma.task.create({
                     data: {
@@ -225,10 +254,14 @@ export async function POST(request: NextRequest) {
         data: { lastSyncedAt: new Date() },
       });
 
+      console.log(`Slack sync complete: ${messagesScanned} messages scanned, ${messagesFiltered} filtered out, ${totalItems} tasks created`);
+
       return NextResponse.json({
         success: true,
-        message: `Synced ${totalItems} items from Slack`,
+        message: `Synced ${totalItems} items from Slack (${messagesScanned} messages scanned, ${messagesFiltered} filtered)`,
         itemCount: totalItems,
+        messagesScanned,
+        messagesFiltered,
       });
     } catch (error) {
       console.error('Slack API error:', error);
