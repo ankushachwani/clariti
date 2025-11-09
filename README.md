@@ -1,309 +1,230 @@
-# Clariti
+# 🌿 Clariti
 
 **From chaos to clarity, one day at a time.**
 
-Clariti is an AI-powered productivity assistant built specifically for college students to transform scattered academic tasks into clear, actionable priorities.
+Clariti is an AI-powered productivity platform for college students that transforms scattered academic tasks into clear, actionable priorities with a beautiful nature-inspired interface.
 
-![Clariti Dashboard](https://via.placeholder.com/800x400?text=Clariti+Dashboard)
+## ✨ Features
 
-## Features
+### 🎯 Smart Task Management
+- **AI-Powered Prioritization**: Cohere AI intelligently analyzes and prioritizes tasks based on deadline proximity, importance, and context
+- **Multi-Source Aggregation**: Automatically syncs tasks from Canvas, Gmail, Google Calendar, Discord, Slack, and Notion
+- **Smart Filtering**: Filter tasks by status, priority, source, and date with beautiful animated UI
+- **Duplicate Prevention**: Intelligent deduplication ensures each task appears only once, even across multiple syncs
 
-### Core Functionality
+### 📅 Dashboard & Calendar
+- **Daily Brief**: Morning overview with your highest-priority tasks and completion progress
+- **Tasks Due Today**: Real-time counter with timezone-aware calculations
+- **Interactive Calendar**: Visual month view with all deadlines, events, and color-coded task sources
+- **Priority Tasks Widget**: Quick access to your top 5 most important items
 
-- **AI-Powered Prioritization**: Cohere AI analyzes your tasks and assignments to intelligently prioritize what matters most
-- **Smart Aggregation**: Centralizes data from Canvas, Gmail, Google Calendar, Discord, Slack, and Notion
-- **Daily Debrief**: Personalized morning brief with your highest-priority tasks and progress tracking
-- **Calendar Integration**: Visual calendar view with all your deadlines and events in one place
-- **Task Management**: Complete task list with smart filtering and completion tracking
-
-### Integrations
+### 🔗 Seamless Integrations
 
 #### Education
-- **Canvas LMS**: Sync assignments, grades, course announcements, and due dates
+- **Canvas LMS**: Assignments, grades, course announcements, due dates, and modules
 
-#### Communication
-- **Gmail**: Import academic emails and professor announcements
-- **Discord**: Monitor course server announcements
-- **Slack**: Track team project communications
+#### Communication & Collaboration
+- **Gmail**: Academic emails and professor announcements (AI-filtered for importance)
+- **Discord**: Course server announcements and important messages
+- **Slack**: Team project communications, starred items, and reminders
 
 #### Productivity
-- **Google Calendar**: Sync events, meetings, and deadlines
-- **Notion**: Import personal notes and task databases
+- **Google Calendar**: Events, meetings, and deadlines
+- **Notion**: Personal notes and task databases
 
-### AI Capabilities
-
-- Task summarization and action-item extraction
-- Intelligent priority scoring based on:
-  - Deadline proximity
+### 🤖 AI Capabilities
+- Automatic task extraction from messages and emails
+- Intelligent priority scoring (0-10 scale) based on:
+  - Deadline urgency
   - Course importance
   - Assignment weight
-  - Past completion patterns
-  - Attendance consistency
-- Daily motivational messages
+  - Historical patterns
+- Smart filtering of noise (only imports actionable items)
+- Task summarization and description enhancement
 
-## Tech Stack
+### 🎨 Design System
+- **EarthTone Theme**: Nature-inspired color palette with forest greens, moss, cream, sage, and earth browns
+- **Organic Animations**: Smooth transitions powered by Framer Motion
+- **Responsive Layout**: Beautiful on desktop, tablet, and mobile
+- **Custom Typography**: Merriweather serif for headings, Open Sans for body text
+
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | Next.js 14, React 18, TypeScript, TailwindCSS |
-| **Backend** | Next.js API Routes, Node.js |
+| **Framework** | Next.js 14 (App Router), React 18, TypeScript |
+| **Styling** | TailwindCSS with custom EarthTone palette |
+| **Animation** | Framer Motion 12.x |
 | **Database** | PostgreSQL with Prisma ORM |
 | **AI** | Cohere API |
-| **Auth** | NextAuth.js with Google OAuth2 |
-| **Deployment** | Vercel / Railway |
+| **Authentication** | NextAuth.js with Google OAuth2 |
+| **Icons** | Lucide React |
+| **Calendar** | React Calendar |
+| **Deployment** | Vercel |
 
-## Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
+```bash
+git clone https://github.com/ankushachwani/clariti.git
+cd clariti
+npm install
+cp .env.example .env
+# Add your API keys to .env
+npx prisma generate && npx prisma db push
+npm run dev
+```
 
-- Node.js 18+ installed
-- PostgreSQL database (local or cloud)
-- Google account for OAuth
-- Cohere API account
+**Required Setup:**
+- PostgreSQL database
+- Google OAuth (sign-in)
+- Cohere API key (AI prioritization)
+- Canvas/Discord/Slack/Notion tokens (optional integrations)
 
-### Installation
+Check `.env.example` for all variables.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/clariti.git
-   cd clariti
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-
-   Edit `.env` and add your credentials:
-   ```bash
-   DATABASE_URL="postgresql://user:password@localhost:5432/clariti"
-   NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="generate-with-openssl-rand-base64-32"
-   COHERE_API_KEY="your-cohere-api-key"
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
-   # ... other integrations
-   ```
-
-4. **Generate NextAuth secret**
-   ```bash
-   openssl rand -base64 32
-   ```
-
-5. **Set up database**
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-
-6. **Run development server**
-   ```bash
-   npm run dev
-   ```
-
-   Open [http://localhost:3000](http://localhost:3000)
-
-## Integration Setup
-
-For detailed setup instructions for each integration, see [INTEGRATION_SETUP.md](./INTEGRATION_SETUP.md)
-
-Quick links:
-- [Database Setup](./INTEGRATION_SETUP.md#database-setup)
-- [Cohere AI](./INTEGRATION_SETUP.md#cohere-ai-setup)
-- [Google OAuth](./INTEGRATION_SETUP.md#google-oauth-gmail--calendar)
-- [Canvas LMS](./INTEGRATION_SETUP.md#canvas-lms-integration)
-- [Discord](./INTEGRATION_SETUP.md#discord-integration)
-- [Slack](./INTEGRATION_SETUP.md#slack-integration)
-- [Notion](./INTEGRATION_SETUP.md#notion-integration)
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 clariti/
-├── app/                      # Next.js app directory
-│   ├── api/                  # API routes
-│   │   ├── auth/            # NextAuth routes
-│   │   ├── integrations/    # Integration OAuth callbacks
-│   │   ├── tasks/           # Task management API
-│   │   └── user/            # User settings API
-│   ├── dashboard/           # Dashboard page
-│   ├── tasks/               # Tasks page
-│   ├── calendar/            # Calendar page
-│   ├── profile/             # Profile & settings page
-│   └── auth/                # Auth pages
-├── components/              # React components
-│   ├── dashboard/          # Dashboard components
-│   ├── tasks/              # Task components
-│   ├── calendar/           # Calendar components
-│   ├── profile/            # Profile components
-│   ├── layout/             # Layout components
-│   └── shared/             # Shared components
-├── lib/                     # Utility libraries
-│   ├── ai/                 # Cohere AI integration
-│   ├── auth/               # NextAuth configuration
-│   ├── integrations/       # Integration helpers
-│   ├── utils/              # Utility functions
-│   └── prisma.ts           # Prisma client
-├── prisma/                  # Database schema
-│   └── schema.prisma
-├── types/                   # TypeScript type definitions
-└── public/                  # Static assets
+├── app/                          # Next.js 14 App Router
+│   ├── api/                      # API Routes
+│   │   ├── auth/                 # NextAuth.js authentication
+│   │   │   └── [...nextauth]/
+│   │   ├── ai/                   # AI processing endpoints
+│   │   ├── integrations/         # Integration OAuth & sync
+│   │   │   ├── canvas/
+│   │   │   ├── discord/
+│   │   │   ├── gmail/
+│   │   │   ├── google-calendar/
+│   │   │   ├── notion/
+│   │   │   ├── slack/
+│   │   │   └── sync/            # Unified sync endpoint
+│   │   ├── tasks/               # Task CRUD operations
+│   │   │   └── [id]/
+│   │   ├── user/                # User settings & notifications
+│   │   └── cron/                # Scheduled jobs (prioritization)
+│   ├── auth/                    # Auth pages
+│   │   └── signin/
+│   ├── dashboard/               # Main dashboard
+│   ├── tasks/                   # Task management page
+│   ├── calendar/                # Calendar view
+│   ├── profile/                 # Profile & integrations
+│   ├── onboarding/              # First-time setup
+│   ├── globals.css              # Global styles + EarthTone theme
+│   ├── layout.tsx               # Root layout with navbar
+│   ├── page.tsx                 # Landing page
+│   └── providers.tsx            # Client-side providers
+├── components/
+│   ├── dashboard/               # Dashboard widgets
+│   │   ├── DailyBrief.tsx
+│   │   └── PriorityTasks.tsx
+│   ├── tasks/
+│   │   └── TasksList.tsx        # Main task list with filters
+│   ├── calendar/
+│   │   └── CalendarView.tsx     # Interactive calendar
+│   ├── profile/
+│   │   ├── ProfileSettings.tsx
+│   │   ├── IntegrationsPanel.tsx
+│   │   └── NotificationSettings.tsx
+│   ├── layout/
+│   │   └── Navbar.tsx           # Navigation bar
+│   └── shared/                  # Reusable components
+│       ├── OrganicCard.tsx      # Animated card wrapper
+│       ├── LeafButton.tsx       # Nature-themed button
+│       └── PageTransition.tsx   # Page animations
+├── lib/
+│   ├── ai/
+│   │   └── cohere.ts            # Cohere AI client & helpers
+│   ├── auth/
+│   │   └── auth-options.ts      # NextAuth configuration
+│   ├── integrations/            # Integration API clients
+│   │   ├── canvas.ts
+│   │   ├── discord.ts
+│   │   ├── gmail.ts
+│   │   ├── google-calendar.ts
+│   │   ├── notion.ts
+│   │   └── slack.ts
+│   ├── utils/
+│   │   └── date-utils.ts        # Timezone helpers
+│   └── prisma.ts                # Prisma client singleton
+├── prisma/
+│   └── schema.prisma            # Database schema
+├── types/
+│   ├── index.ts                 # Shared TypeScript types
+│   └── next-auth.d.ts           # NextAuth type extensions
+├── public/                      # Static assets
+├── tailwind.config.ts           # TailwindCSS + custom colors
+└── package.json
 ```
 
-## Usage
+## 💻 Usage
 
-### First-Time Setup
+1. Sign in with Google
+2. Connect integrations in Profile
+3. Click "Sync All" on Tasks page
+4. Check Dashboard for prioritized tasks
 
-1. **Sign in with Google**
-   - Click "Sign In" on the homepage
-   - Authorize Gmail and Google Calendar access
+**Daily:** Mark tasks complete, check priority tasks widget  
+**Weekly:** Review calendar, sync integrations
 
-2. **Connect Integrations**
-   - Go to Profile > Integrations
-   - Click "Connect" for each integration you want to use
-   - Follow OAuth authorization flows
-
-3. **Sync Your Data**
-   - After connecting integrations, click "Sync" on the Tasks page
-   - Wait for initial data import (may take a few minutes)
-
-4. **View Your Dashboard**
-   - Go to Dashboard to see your daily debrief
-   - Check priority tasks and completion progress
-
-### Daily Workflow
-
-1. **Morning**: Check your Daily Debrief for top priorities
-2. **Throughout the day**: Mark tasks as complete
-3. **Evening**: Review Calendar for upcoming deadlines
-4. **Weekly**: Check Tasks page with filters for planning
-
-## Development
-
-### Running Tests
+## 🛠️ Development
 
 ```bash
-npm run test
+npm run dev          # Start dev server
+npx prisma studio    # View database
+npm run build        # Production build
 ```
 
-### Building for Production
+**Key APIs:**
+- `PATCH /api/tasks/[id]` - Update task
+- `POST /api/integrations/sync` - Sync all
+- `POST /api/cron/prioritize` - Re-prioritize (requires CRON_SECRET)
 
-```bash
-npm run build
-npm run start
-```
+## 🚀 Deploy
 
-### Database Management
-
-```bash
-# View database in Prisma Studio
-npx prisma studio
-
-# Reset database
-npx prisma db push --force-reset
-
-# Generate new Prisma Client after schema changes
-npx prisma generate
-```
-
-### Environment Variables
-
-See `.env.example` for all required environment variables.
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push code to GitHub
-2. Import to Vercel
+**Vercel:**
+1. Push to GitHub
+2. Import to Vercel (auto-detects Next.js)
 3. Add environment variables
-4. Deploy
+4. Update OAuth redirect URLs to production domain
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/clariti)
+**Database:** Railway, Supabase, or Vercel Postgres
 
-### Railway
+## 🎨 EarthTone Design
 
-1. Connect GitHub repository
-2. Add PostgreSQL database
-3. Configure environment variables
-4. Deploy
+Nature-inspired color palette with organic animations:
+- **Forest Green** (#2D5B3D) - Primary
+- **Moss Green** (#8FBC8F) - Accents  
+- **Cream White** (#FFF8DC) - Backgrounds
+- **Earth Brown** (#4A4A3A) - Text
+- **Sunset Coral** (#FF6B6B) - High priority
+- **Sunflower Yellow** (#FFD700) - Medium priority
 
-See [INTEGRATION_SETUP.md#deployment](./INTEGRATION_SETUP.md#deployment) for detailed instructions.
+Typography: Merriweather (serif), Open Sans (sans-serif)
 
-## API Documentation
+## 🗺️ Roadmap
 
-### Task Endpoints
+**Current (v1.0)**
+- ✅ AI prioritization with Cohere
+- ✅ 6 integrations (Canvas, Gmail, Calendar, Discord, Slack, Notion)
+- ✅ Dashboard, tasks, calendar views
+- ✅ EarthTone design system
+- ✅ Duplicate prevention & timezone handling
 
-- `PATCH /api/tasks/[id]` - Update task (mark complete/incomplete)
-- `DELETE /api/tasks/[id]` - Delete task
+**Future**
+- [ ] Chrome extension
+- [ ] Mobile app
+- [ ] Study analytics
+- [ ] Group collaboration
+- [ ] Grade predictions
 
-### User Endpoints
+## 👥 Team
 
-- `PATCH /api/user/settings` - Update user profile and preferences
-- `PATCH /api/user/notifications` - Update notification settings
+Built by Ankush, Anthony, and Linus
 
-### Integration Endpoints
+## 📄 License
 
-- `GET /api/integrations/[provider]/connect` - Initiate OAuth flow
-- `GET /api/integrations/[provider]/callback` - OAuth callback
-- `POST /api/integrations/sync` - Trigger sync for all integrations
-
-## Roadmap
-
-### MVP (Current)
-- ✅ Dashboard with daily debrief
-- ✅ Task management with AI prioritization
-- ✅ Calendar view
-- ✅ 6 core integrations
-- ✅ Profile and settings
-
-### Stretch Features
-- [ ] Chrome extension for auto-detecting assignments
-- [ ] Auto-tagging tasks by class/course
-- [ ] Group project collaboration views
-- [ ] Study analytics and insights
-- [ ] Attendance risk prediction model
-- [ ] Mobile app (React Native)
-- [ ] Browser notifications
-- [ ] Email digest
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built for **HackUMass 2024**
-- Powered by **Cohere AI** for intelligent task prioritization
-- Inspired by the need to help college students manage information overload
-
-## Team
-
-- **Ankush** - Developer
-- **Anthony** - Developer
-- **Linus** - Developer
-
-## Support
-
-For questions or issues:
-- Open an issue on GitHub
-- Check [INTEGRATION_SETUP.md](./INTEGRATION_SETUP.md) for integration help
-- Review the troubleshooting section
+MIT License - see [LICENSE](LICENSE)
 
 ---
 
