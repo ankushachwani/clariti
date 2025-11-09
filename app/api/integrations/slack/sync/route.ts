@@ -50,10 +50,12 @@ export async function POST(request: NextRequest) {
 
     // Fetch user's messages and reminders
     try {
-      const sevenDaysAgo = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
-      
       // Use search API to find user's own messages (works across all channels)
-      const searchQuery = `from:me after:${sevenDaysAgo}`;
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const dateStr = sevenDaysAgo.toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      const searchQuery = `from:me after:${dateStr}`;
       const searchResponse = await fetch(
         `https://slack.com/api/search.messages?query=${encodeURIComponent(searchQuery)}&count=100&sort=timestamp`,
         {
