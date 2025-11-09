@@ -92,17 +92,16 @@ export async function sendDailyDigest(
       }
 
       return `
-    <div style="margin-bottom: 16px; padding: 16px; background: ${index === 0 ? '#fef3c7' : '#f3f4f6'}; border-radius: 10px; border-left: 4px solid ${priorityColor};">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-        <div style="display: flex; align-items: center;">
-          <span style="font-size: 18px; font-weight: bold; color: #4f46e5; margin-right: 12px;">#${index + 1}</span>
-          <span style="font-weight: 600; color: #1f2937; font-size: 15px;">${task.title}</span>
-        </div>
-        <span style="font-size: 11px; padding: 3px 8px; background: ${priorityColor}; color: white; border-radius: 12px; font-weight: 600;">${priorityLabel}</span>
+    <div style="margin-bottom: 12px; padding: 18px; background: white; border-radius: 8px; border-left: 4px solid ${priorityColor}; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="margin-bottom: 8px;">
+        <span style="font-size: 16px; font-weight: bold; color: ${priorityColor}; margin-right: 8px;">#${index + 1}</span>
+        <span style="font-weight: 600; color: #1f2937; font-size: 16px;">${task.title}</span>
       </div>
-      ${task.description ? `<p style="margin: 8px 0 8px 30px; color: #4b5563; font-size: 14px; line-height: 1.5;">${task.description.substring(0, 150)}${task.description.length > 150 ? '...' : ''}</p>` : ''}
-      ${dueDateHtml ? `<p style="margin: 8px 0 0 30px; font-size: 13px;">${dueDateHtml}</p>` : ''}
-      ${task.course ? `<p style="margin: 4px 0 0 30px; color: #6b7280; font-size: 12px;">� ${task.course}</p>` : ''}
+      ${task.description ? `<p style="margin: 8px 0; color: #6b7280; font-size: 14px; line-height: 1.5;">${task.description.substring(0, 150)}${task.description.length > 150 ? '...' : ''}</p>` : ''}
+      <div style="margin-top: 8px;">
+        ${dueDateHtml ? `<div style="margin-bottom: 4px; font-size: 13px;">${dueDateHtml}</div>` : ''}
+        ${task.course ? `<div style="color: #6b7280; font-size: 12px;">📚 ${task.course}</div>` : ''}
+      </div>
     </div>
   `;
     })
