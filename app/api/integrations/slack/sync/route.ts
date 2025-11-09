@@ -87,7 +87,10 @@ export async function POST(request: NextRequest) {
                   // Use AI to analyze the message
                   const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, channel.name);
                   
-                  if (!aiAnalysis.isImportant || !aiAnalysis.dueDate) continue;
+                  if (!aiAnalysis.isImportant) {
+                    console.log(`Filtered out Slack message: "${text.substring(0, 50)}..." (not important)`);
+                    continue;
+                  }
 
                   const sourceId = `slack_msg_${message.ts}`;
 
@@ -142,7 +145,10 @@ export async function POST(request: NextRequest) {
             // Use AI to analyze the message
             const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, 'starred');
             
-            if (!aiAnalysis.isImportant || !aiAnalysis.dueDate) continue;
+            if (!aiAnalysis.isImportant) {
+              console.log(`Filtered out starred Slack message: "${text.substring(0, 50)}..." (not important)`);
+              continue;
+            }
 
             const sourceId = `slack_star_${item.message.ts || item.date_create}`;
 
@@ -252,34 +258,38 @@ async function analyzeSlackMessageWithAI(
     
     const prompt = `Today's date is ${currentDate}.
 
-Analyze this Slack message${channelName ? ` from #${channelName}` : ''} and determine if it's an ACTIONABLE TASK.
+Analyze this Slack message${channelName ? ` from #${channelName}` : ''} and determine if it's IMPORTANT for work/school.
 
 Message: ${text.substring(0, 500)}
 
-CRITICAL: Only mark isImportant=true if this requires someone to DO SOMETHING with a deadline.
+Mark isImportant=TRUE for:
+- Task assignments (even without explicit deadline)
+- Project discussions and action items
+- Meeting reminders and scheduling
+- Code review requests
+- Important questions that need responses
+- Work/school related discussions
+- Blockers or issues raised
+- Requests for help or collaboration
+- Decision-making threads
 
 Mark isImportant=FALSE for:
-- Casual conversations, chit-chat
-- Social messages, memes, jokes
-- FYI updates with no action needed
-- General announcements without deadlines
-- "Thanks", "Got it", acknowledgments
-- Questions without deadlines
+- Casual chit-chat, social messages
+- Memes, jokes, off-topic
+- Simple acknowledgments ("thanks", "got it", "ok")
+- General FYI with no action or discussion needed
+- Bot messages
+- Automated notifications
 
-Mark isImportant=TRUE only for:
-- Task assignments with deadlines (e.g., "Can you finish X by Friday?")
-- Project deadlines mentioned
-- Meeting reminders with specific times to attend
-- Code review requests with due dates
-- Action items from meetings
+Try to extract due date if mentioned (e.g., "by Friday", "tomorrow", "next week"), but it's OPTIONAL.
 
-If isImportant=true, rewrite into a clear task title and extract the deadline.
+Rewrite title to be clear and concise.
 
 Respond with ONLY a JSON object (no markdown):
 {
   "isImportant": true/false,
-  "title": "Clear task title" or null,
-  "description": "What needs to be done" or null,
+  "title": "Clear task/discussion title" or null,
+  "description": "What this is about" or null,
   "dueDate": "YYYY-MM-DD" or null
 }`;
 
