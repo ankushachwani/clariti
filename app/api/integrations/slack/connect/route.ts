@@ -17,17 +17,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Slack not configured' }, { status: 500 });
   }
 
-  // Slack OAuth scopes
+  // Slack OAuth scopes (user scopes)
   const scopes = [
     'channels:history',
     'channels:read',
     'groups:history',
     'groups:read',
     'users:read',
-    'users:read.email',
     'im:history',
     'im:read',
-    'search:read', // Required to search user's messages
+    'search:read', // Search user's messages
   ].join(',');
 
   // Build Slack OAuth authorization URL
