@@ -7,7 +7,6 @@ import { generateDailyMotivation, generateWorkRoadmap } from '@/lib/ai/cohere';
 import DailyBrief from '@/components/dashboard/DailyBrief';
 import PriorityTasks from '@/components/dashboard/PriorityTasks';
 import SyncButton from '@/components/dashboard/SyncButton';
-import CleanupButton from '@/components/dashboard/CleanupButton';
 import Navbar from '@/components/layout/Navbar';
 
 export const revalidate = 0; // Disable caching for real-time data
@@ -104,10 +103,7 @@ export default async function DashboardPage() {
               {motivationalMessage}
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <CleanupButton />
-            <SyncButton />
-          </div>
+          <SyncButton />
         </div>
 
         <DailyBrief

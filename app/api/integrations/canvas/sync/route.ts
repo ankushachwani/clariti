@@ -35,6 +35,14 @@ export async function POST(request: NextRequest) {
     const canvasUrl = (integration.metadata as any)?.canvasUrl || process.env.CANVAS_API_URL;
     const accessToken = integration.accessToken;
 
+    // Delete all existing Canvas tasks to avoid duplicates
+    await prisma.task.deleteMany({
+      where: {
+        userId: user.id,
+        source: 'canvas',
+      },
+    });
+
     // Fetch all courses
     const coursesResponse = await fetch(`${canvasUrl}/api/v1/courses?enrollment_state=active`, {
       headers: {
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest) {
     const courses = await coursesResponse.json();
     let totalItems = 0;
 
-    // Track processed items to avoid duplicates
+    // Track processed items to avoid duplicates within this sync
     const processedItems = new Set<string>();
 
     // For each course, fetch multiple types of content
@@ -77,18 +85,6 @@ export async function POST(request: NextRequest) {
 
             const dueDate = assignment.due_at ? new Date(assignment.due_at) : null;
 
-            // Check for existing tasks with both old and new sourceId formats
-            const existingTask = await prisma.task.findFirst({
-              where: {
-                userId: user.id,
-                source: 'canvas',
-                OR: [
-                  { sourceId: `assignment_${assignment.id}` },
-                  { sourceId: assignment.id.toString() }, // Old format without prefix
-                ],
-              },
-            });
-
             const taskData = {
               title: assignment.name,
               description: assignment.description || `Assignment for ${course.name}`,
@@ -104,25 +100,14 @@ export async function POST(request: NextRequest) {
               },
             };
 
-            if (existingTask) {
-              // Update and ensure sourceId has correct prefix
-              await prisma.task.update({
-                where: { id: existingTask.id },
-                data: {
-                  ...taskData,
-                  sourceId: `assignment_${assignment.id}`, // Ensure proper prefix
-                },
-              });
-            } else {
-              await prisma.task.create({
-                data: {
-                  userId: user.id,
-                  source: 'canvas',
-                  sourceId: `assignment_${assignment.id}`,
-                  ...taskData,
-                },
-              });
-            }
+            await prisma.task.create({
+              data: {
+                userId: user.id,
+                source: 'canvas',
+                sourceId: `assignment_${assignment.id}`,
+                ...taskData,
+              },
+            });
 
             totalItems++;
           }
@@ -156,14 +141,6 @@ export async function POST(request: NextRequest) {
             
             if (postedDate < thirtyDaysAgo) continue;
 
-            const existingTask = await prisma.task.findFirst({
-              where: {
-                userId: user.id,
-                source: 'canvas',
-                sourceId: `announcement_${announcement.id}`,
-              },
-            });
-
             const taskData = {
               title: `📢 ${announcement.title}`,
               description: announcement.message || 'Course announcement',
@@ -178,21 +155,14 @@ export async function POST(request: NextRequest) {
               },
             };
 
-            if (existingTask) {
-              await prisma.task.update({
-                where: { id: existingTask.id },
-                data: taskData,
-              });
-            } else {
-              await prisma.task.create({
-                data: {
-                  userId: user.id,
-                  source: 'canvas',
-                  sourceId: `announcement_${announcement.id}`,
-                  ...taskData,
-                },
-              });
-            }
+            await prisma.task.create({
+              data: {
+                userId: user.id,
+                source: 'canvas',
+                sourceId: `announcement_${announcement.id}`,
+                ...taskData,
+              },
+            });
 
             totalItems++;
           }
@@ -220,14 +190,6 @@ export async function POST(request: NextRequest) {
 
             const dueDate = quiz.due_at ? new Date(quiz.due_at) : null;
 
-            const existingTask = await prisma.task.findFirst({
-              where: {
-                userId: user.id,
-                source: 'canvas',
-                sourceId: `quiz_${quiz.id}`,
-              },
-            });
-
             const taskData = {
               title: `📝 ${quiz.title}`,
               description: quiz.description || `Quiz for ${course.name}`,
@@ -244,21 +206,14 @@ export async function POST(request: NextRequest) {
               },
             };
 
-            if (existingTask) {
-              await prisma.task.update({
-                where: { id: existingTask.id },
-                data: taskData,
-              });
-            } else {
-              await prisma.task.create({
-                data: {
-                  userId: user.id,
-                  source: 'canvas',
-                  sourceId: `quiz_${quiz.id}`,
-                  ...taskData,
-                },
-              });
-            }
+            await prisma.task.create({
+              data: {
+                userId: user.id,
+                source: 'canvas',
+                sourceId: `quiz_${quiz.id}`,
+                ...taskData,
+              },
+            });
 
             totalItems++;
           }
@@ -288,14 +243,6 @@ export async function POST(request: NextRequest) {
 
             const dueDate = discussion.assignment?.due_at ? new Date(discussion.assignment.due_at) : null;
 
-            const existingTask = await prisma.task.findFirst({
-              where: {
-                userId: user.id,
-                source: 'canvas',
-                sourceId: `discussion_${discussion.id}`,
-              },
-            });
-
             const taskData = {
               title: `💬 ${discussion.title}`,
               description: discussion.message || 'Discussion topic',
@@ -310,21 +257,14 @@ export async function POST(request: NextRequest) {
               },
             };
 
-            if (existingTask) {
-              await prisma.task.update({
-                where: { id: existingTask.id },
-                data: taskData,
-              });
-            } else {
-              await prisma.task.create({
-                data: {
-                  userId: user.id,
-                  source: 'canvas',
-                  sourceId: `discussion_${discussion.id}`,
-                  ...taskData,
-                },
-              });
-            }
+            await prisma.task.create({
+              data: {
+                userId: user.id,
+                source: 'canvas',
+                sourceId: `discussion_${discussion.id}`,
+                ...taskData,
+              },
+            });
 
             totalItems++;
           }
