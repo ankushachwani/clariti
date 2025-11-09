@@ -6,6 +6,7 @@ import { getGreeting } from '@/lib/utils/date-utils';
 import { generateDailyMotivation, generateWorkRoadmap } from '@/lib/ai/cohere';
 import DailyBrief from '@/components/dashboard/DailyBrief';
 import PriorityTasks from '@/components/dashboard/PriorityTasks';
+import SyncButton from '@/components/dashboard/SyncButton';
 import Navbar from '@/components/layout/Navbar';
 
 export const revalidate = 0; // Disable caching for real-time data
@@ -84,13 +85,16 @@ export default async function DashboardPage() {
     <>
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            {greeting}, {user.name?.split(' ')[0] || 'there'}!
-          </h1>
-          <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold mt-1">
-            {motivationalMessage}
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {greeting}, {user.name?.split(' ')[0] || 'there'}!
+            </h1>
+            <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold mt-1">
+              {motivationalMessage}
+            </p>
+          </div>
+          <SyncButton />
         </div>
 
         <DailyBrief
