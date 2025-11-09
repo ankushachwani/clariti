@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
     // Fetch user's messages and reminders
     try {
       // Get recent messages from channels the user is in (past 7 days)
+      console.log('Calling Slack users.conversations API...');
       const userInfoResponse = await fetch('https://slack.com/api/users.conversations', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -58,15 +59,20 @@ export async function POST(request: NextRequest) {
       });
 
       console.log('Slack users.conversations status:', userInfoResponse.status);
+      
+      const channelsData = await userInfoResponse.json();
+      console.log('Slack users.conversations full response:', JSON.stringify(channelsData, null, 2));
 
       if (userInfoResponse.ok) {
-        const channelsData = await userInfoResponse.json();
         
         console.log('Slack channels response:', { ok: channelsData.ok, channelCount: channelsData.channels?.length, error: channelsData.error });
         
         if (!channelsData.ok) {
           console.error('Slack API error:', channelsData.error);
-          throw new Error(`Slack API error: ${channelsData.error}`);
+          return NextResponse.json({ 
+            error: `Slack API error: ${channelsData.error}`,
+            details: channelsData 
+          }, { status: 400 });
         }
         
         if (channelsData.ok && channelsData.channels) {
@@ -332,7 +338,7 @@ Respond with ONLY a JSON object (no markdown):
 }`;
 
     const response = await cohere.chat({
-      model: 'command-r-plus',
+      model: 'command-light',
       message: prompt,
       temperature: 0.3,
     });

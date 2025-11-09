@@ -393,7 +393,7 @@ Respond with ONLY a JSON object (no markdown):
 }`;
 
     const response = await cohere.chat({
-      model: 'command-r-plus',
+      model: 'command-light',
       message: prompt,
       temperature: 0.3,
     });
