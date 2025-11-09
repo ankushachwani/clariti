@@ -176,6 +176,26 @@ export async function POST(request: NextRequest) {
             const snippet = messageData.snippet || emailBody.substring(0, 500);
             const fullContent = subject + ' ' + emailBody;
 
+            // Hard filter: Immediately reject obvious personal items
+            const lowerSubject = subject.toLowerCase();
+            const lowerContent = fullContent.toLowerCase();
+            
+            if (
+              lowerSubject.includes('birthday') ||
+              lowerSubject.includes('bday') ||
+              lowerSubject.includes("'s birthday") ||
+              lowerContent.includes('happy birthday') ||
+              (lowerSubject.includes('statement') && !lowerContent.includes('payment due')) ||
+              (lowerSubject.includes('credit card') && !lowerContent.includes('payment due')) ||
+              lowerSubject.includes('promotional') ||
+              lowerSubject.includes('newsletter') ||
+              lowerSubject.includes('unsubscribe')
+            ) {
+              filteredOut++;
+              console.log(`Hard filtered email: "${subject}" (obvious personal/promotional)`);
+              continue;
+            }
+
             // Use AI to determine if email is important and extract due date
             const aiAnalysis = await analyzeEmailWithAI(subject, snippet, fullContent, receivedDate);
             

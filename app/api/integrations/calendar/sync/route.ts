@@ -63,6 +63,20 @@ export async function POST(request: NextRequest) {
         const title = event.summary || 'Untitled Event';
         const description = event.description || '';
 
+        // Hard filter: Immediately reject obvious personal events
+        const lowerTitle = title.toLowerCase();
+        if (
+          lowerTitle.includes('birthday') ||
+          lowerTitle.includes('bday') ||
+          lowerTitle.includes("'s birthday") ||
+          lowerTitle.includes('anniversary') ||
+          lowerTitle.includes('party') ||
+          lowerTitle.includes('celebration')
+        ) {
+          console.log(`Hard filtered calendar event: "${title}" (obvious personal event)`);
+          continue;
+        }
+
         // Use AI to filter and rewrite calendar events
         const aiAnalysis = await analyzeCalendarEventWithAI(title, description);
         
