@@ -82,24 +82,26 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+    <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl shadow-lg shadow-earth-brown/20 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-t-lg">
-        <div className="flex items-center gap-2">
-          <Bot className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between p-5 border-b-2 border-sage-gray/30 bg-gradient-to-r from-moss-green/20 to-ocean-teal/20">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-forest-green to-moss-green rounded-full flex items-center justify-center shadow-md">
+            <Bot className="w-6 h-6 text-cream-white" />
+          </div>
+          <h3 className="text-xl font-bold font-serif text-forest-green">
             AI Assistant
           </h3>
         </div>
         <button
           onClick={() => setIsMinimized(!isMinimized)}
-          className="p-1 hover:bg-white/50 dark:hover:bg-gray-600/50 rounded transition-colors"
+          className="p-2 hover:bg-sage-gray/20 rounded-full transition-all"
           aria-label={isMinimized ? 'Maximize' : 'Minimize'}
         >
           {isMinimized ? (
-            <Maximize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <Maximize2 className="w-5 h-5 text-forest-green" />
           ) : (
-            <Minimize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <Minimize2 className="w-5 h-5 text-forest-green" />
           )}
         </button>
       </div>
@@ -107,7 +109,7 @@ export default function Chatbot() {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="h-96 overflow-y-auto p-4 space-y-4">
+          <div className="h-96 overflow-y-auto p-6 space-y-4 bg-stone-beige/30">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -116,33 +118,33 @@ export default function Chatbot() {
                 }`}
               >
                 {message.role === 'assistant' && (
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-forest-green to-moss-green rounded-full flex items-center justify-center shadow-md">
+                    <Bot className="w-6 h-6 text-cream-white" />
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] px-4 py-2 rounded-lg ${
+                  className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      ? 'bg-gradient-to-br from-forest-green to-moss-green text-cream-white font-medium'
+                      : 'bg-cream-white border-2 border-sage-gray/30 text-bark-brown'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 </div>
                 {message.role === 'user' && (
-                  <div className="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-clay-orange to-sunflower-yellow rounded-full flex items-center justify-center shadow-md">
+                    <User className="w-6 h-6 text-cream-white" />
                   </div>
                 )}
               </div>
             ))}
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-forest-green to-moss-green rounded-full flex items-center justify-center shadow-md">
+                  <Bot className="w-6 h-6 text-cream-white" />
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg">
-                  <Loader2 className="w-5 h-5 text-gray-600 dark:text-gray-300 animate-spin" />
+                <div className="bg-cream-white border-2 border-sage-gray/30 px-4 py-3 rounded-2xl">
+                  <Loader2 className="w-5 h-5 text-forest-green animate-spin" />
                 </div>
               </div>
             )}
@@ -152,21 +154,21 @@ export default function Chatbot() {
           {/* Input */}
           <form
             onSubmit={handleSubmit}
-            className="p-4 border-t border-gray-200 dark:border-gray-700"
+            className="p-5 border-t-2 border-sage-gray/30 bg-cream-white"
           >
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about your tasks, events, or schedule..."
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-3 border-2 border-sage-gray/30 rounded-full bg-stone-beige/50 text-bark-brown placeholder-sage-gray focus:outline-none focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
                 disabled={isLoading}
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-br from-forest-green to-moss-green text-cream-white rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium"
               >
                 <Send className="w-4 h-4" />
               </button>

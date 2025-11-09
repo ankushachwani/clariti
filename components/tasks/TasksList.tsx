@@ -239,22 +239,22 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
       <div className="space-y-6">
         {/* Progress Summary */}
         {totalCount > 0 && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="bg-gradient-to-r from-moss-green/20 to-ocean-teal/20 rounded-3xl p-6 border-2 border-moss-green/30 shadow-md shadow-earth-brown/20">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold font-serif text-forest-green">
                 Overall Progress
               </h3>
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <span className="text-3xl font-bold font-serif text-forest-green">
                 {Math.round((completedCount / totalCount) * 100)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+            <div className="w-full bg-sage-gray/30 rounded-full h-4 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-forest-green via-moss-green to-ocean-teal h-4 rounded-full transition-all duration-500 shadow-inner"
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-sm text-bark-brown font-medium mt-2">
               {completedCount} of {totalCount} tasks completed
             </p>
           </div>
@@ -262,22 +262,24 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
 
         {/* Upcoming Tasks */}
         {upcomingTasks.length > 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Upcoming Tasks ({upcomingTasks.length})
-              </h2>
-            </div>
+          <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-8 shadow-md shadow-earth-brown/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-sage-gray/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold font-serif text-forest-green">
+                  Upcoming Tasks ({upcomingTasks.length})
+                </h2>
+              </div>
 
-            <div className="space-y-3">
-              {upcomingTasks.map((task) => {
-                const priority = getPriorityBadge(task.priority);
-                return (
-                  <div
-                    key={task.id}
-                    className="border rounded-lg p-4 transition-colors border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    <div className="flex items-start gap-3">
+              <div className="space-y-3">
+                {upcomingTasks.map((task) => {
+                  const priority = getPriorityBadge(task.priority);
+                  return (
+                    <div
+                      key={task.id}
+                      className="border-2 rounded-2xl p-5 transition-all border-sage-gray/30 hover:bg-stone-beige/50 hover:shadow-md bg-stone-beige/30"
+                    >
+                      <div className="flex items-start gap-3">
                       <button
                         onClick={() => handleToggleComplete(task.id, task.completed)}
                         className="mt-1 flex-shrink-0"
@@ -303,30 +305,30 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                             )}
                           </div>
 
-                          <span
-                            className={`text-xs font-semibold px-2 py-1 rounded whitespace-nowrap ${
+                                                    <span
+                            className={`text-xs px-3 py-1 rounded-full font-bold border-2 ${
                               priority.color === 'red'
-                                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                ? 'bg-sunset-coral/20 border-sunset-coral text-sunset-coral'
                                 : priority.color === 'orange'
-                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
-                                : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                                ? 'bg-clay-orange/20 border-clay-orange text-clay-orange'
+                                : 'bg-sunflower-yellow/20 border-sunflower-yellow text-earth-brown'
                             }`}
                           >
                             {priority.label}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-4 mt-2 flex-wrap text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-4 mt-2 flex-wrap text-sm text-bark-brown font-medium">
                           {task.dueDate && (
                             <span className="flex items-center gap-1">
-                              <AlertCircle className="w-4 h-4" />
+                              <AlertCircle className="w-4 h-4 text-sunset-coral" />
                               {getUrgencyLabel(new Date(task.dueDate))}
                             </span>
                           )}
-                          <span className={`text-xs px-2 py-1 rounded font-medium ${getCategoryBadge(task.category).color}`}>
+                          <span className={`text-xs px-3 py-1 rounded-full font-medium border ${getCategoryBadge(task.category).color}`}>
                             {getCategoryBadge(task.category).icon} {getCategoryBadge(task.category).label}
                           </span>
-                          <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                          <span className="text-xs bg-sage-gray/20 border border-sage-gray/30 px-3 py-1 rounded-full font-medium text-bark-brown">
                             {task.source}
                           </span>
                           {task.sourceUrl && (
@@ -334,10 +336,9 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                               href={task.sourceUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                              className="inline-flex items-center gap-1 text-forest-green hover:text-moss-green hover:underline font-medium"
                             >
-                              View source
-                              <ExternalLink className="w-3 h-3" />
+                              View source <ExternalLink className="w-3 h-3" />
                             </a>
                           )}
                         </div>
@@ -347,25 +348,28 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                 );
               })}
             </div>
+            </div>
           </div>
         )}
 
         {/* Completed Tasks */}
         {showCompleted && completedTasks.length > 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
-                Completed Tasks ({completedTasks.length})
-              </h2>
-            </div>
+          <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-8 shadow-md shadow-earth-brown/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-sage-gray/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold font-serif text-forest-green flex items-center gap-2">
+                  <CheckCircle2 className="w-7 h-7 text-moss-green" />
+                  Completed Tasks ({completedTasks.length})
+                </h2>
+              </div>
 
-            <div className="space-y-3">
-              {completedTasks.map((task) => {
-                const priority = getPriorityBadge(task.priority);
-                return (
-                  <div
-                    key={task.id}
+              <div className="space-y-3">
+                {completedTasks.map((task) => {
+                  const priority = getPriorityBadge(task.priority);
+                  return (
+                    <div
+                      key={task.id}
                     className="border rounded-lg p-4 transition-colors border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
                   >
                     <div className="flex items-start gap-3">
@@ -432,14 +436,15 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                 );
               })}
             </div>
+            </div>
           </div>
         )}
 
         {/* Empty State */}
         {filteredTasks.length === 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-12 text-center">
-            <CheckCircle2 className="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">No tasks found</p>
+          <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-12 text-center shadow-md shadow-earth-brown/20">
+            <CheckCircle2 className="w-20 h-20 text-sage-gray mx-auto mb-4" />
+            <p className="text-bark-brown text-lg font-medium">No tasks found</p>
           </div>
         )}
       </div>
