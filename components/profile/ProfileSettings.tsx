@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Moon, Sun } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface ProfileSettingsProps {
   user: any;
@@ -9,28 +9,7 @@ interface ProfileSettingsProps {
 
 export default function ProfileSettings({ user: initialUser }: ProfileSettingsProps) {
   const [user, setUser] = useState(initialUser);
-  const [theme, setTheme] = useState(initialUser.theme);
   const [saving, setSaving] = useState(false);
-
-  const handleThemeToggle = async () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-
-    try {
-      const response = await fetch('/api/user/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme: newTheme }),
-      });
-
-      if (response.ok) {
-        document.documentElement.classList.toggle('dark', newTheme === 'dark');
-      }
-    } catch (error) {
-      console.error('Error updating theme:', error);
-      setTheme(theme); // Revert on error
-    }
-  };
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,10 +41,10 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
+    <div className="bg-cream-white rounded-3xl shadow-md shadow-earth-brown/20 border-2 border-sage-gray/30 p-6">
       <div className="flex items-center gap-3 mb-6">
-        <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <User className="w-7 h-7 text-forest-green" />
+        <h2 className="text-2xl font-bold font-serif text-forest-green">
           Profile Information
         </h2>
       </div>
@@ -73,37 +52,37 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
       <form onSubmit={handleUpdateProfile} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-bark-brown mb-1">
               Full Name
             </label>
             <input
               type="text"
               name="name"
               defaultValue={user.name || ''}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-bark-brown mb-1">
               Email
             </label>
             <input
               type="email"
               value={user.email}
               disabled
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-sage-gray/20 text-sage-gray cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-bark-brown mb-1">
               Academic Year
             </label>
             <select
               name="academicYear"
               defaultValue={user.academicYear || ''}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
             >
               <option value="">Select year</option>
               <option value="Freshman">Freshman</option>
@@ -115,13 +94,13 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-bark-brown mb-1">
               Timezone
             </label>
             <select
               name="timezone"
               defaultValue={user.timezone}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
             >
               <option value="America/New_York">Eastern Time</option>
               <option value="America/Chicago">Central Time</option>
@@ -131,29 +110,11 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleThemeToggle}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              {theme === 'light' ? (
-                <>
-                  <Moon className="w-4 h-4" /> Dark Mode
-                </>
-              ) : (
-                <>
-                  <Sun className="w-4 h-4" /> Light Mode
-                </>
-              )}
-            </button>
-          </div>
-
+        <div className="flex justify-end pt-4 border-t-2 border-sage-gray/30">
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="px-6 py-3 bg-gradient-to-br from-forest-green to-moss-green text-cream-white text-sm font-medium rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 transition-all"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>

@@ -52,10 +52,30 @@ export default async function DashboardPage() {
   // Generate AI roadmap for top 5 tasks
   const roadmap = await generateWorkRoadmap(priorityTasks.slice(0, 5));
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
+  // Get user's local date using their timezone
+  const userNow = new Date().toLocaleString('en-US', { 
+    timeZone: user.timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  
+  // Parse the localized date string to get today's date in user's timezone
+  const [datePart] = userNow.split(', ');
+  const [month, day, year] = datePart.split('/');
+  const today = new Date(`${year}-${month}-${day}T00:00:00`);
+  const tomorrow = new Date(`${year}-${month}-${day}T23:59:59`);
   tomorrow.setDate(tomorrow.getDate() + 1);
+
+  console.log('Dashboard Debug:', {
+    userTimezone: user.timezone,
+    userNow,
+    todayRange: { start: today.toISOString(), end: tomorrow.toISOString() }
+  });
 
   const tasksDueToday = await prisma.task.findMany({
     where: {
@@ -82,6 +102,15 @@ export default async function DashboardPage() {
       },
       completed: true,
     },
+  });
+
+  console.log('Tasks found:', {
+    dueToday: tasksDueToday.length,
+    dueTodayTasks: tasksDueToday.map(t => ({
+      title: t.title,
+      dueDate: t.dueDate?.toISOString(),
+      category: t.category
+    }))
   });
 
   const greeting = getGreeting(user.timezone);

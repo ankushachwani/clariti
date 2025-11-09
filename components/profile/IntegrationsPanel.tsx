@@ -145,14 +145,14 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
       {/* Canvas Token Modal */}
       {showCanvasModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex justify-between items-start mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                   Connect Canvas LMS
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -165,7 +165,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
                   setTokenError('');
                   setConnecting(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -181,7 +181,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
                   value={canvasUrl}
                   onChange={(e) => setCanvasUrl(e.target.value)}
                   placeholder="https://umamherst.instructure.com"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -197,7 +197,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
                     setTokenError('');
                   }}
                   placeholder="Enter your Canvas access token"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -259,20 +259,20 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
           return (
             <div
               key={config.provider}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all bg-white dark:bg-gray-800"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{config.icon}</span>
+                  <span className="text-3xl">{config.icon}</span>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {config.name}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       {config.description}
                     </p>
                     {isConnected && config.connectedViaGoogle && (
-                      <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium">
                         ✓ Connected via Google OAuth
                       </p>
                     )}
@@ -288,7 +288,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
                   {isConnected ? (
                     <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
                   ) : (
-                    <XCircle className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+                    <XCircle className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                   )}
                 </div>
               </div>
@@ -296,14 +296,14 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
               <div className="mt-4">
                 {isConnected ? (
                   config.connectedViaGoogle ? (
-                    <div className="w-full px-4 py-2 text-sm font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-md text-center">
+                    <div className="w-full px-4 py-2 text-sm font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg text-center border border-green-200 dark:border-green-800">
                       Connected via Google
                     </div>
                   ) : (
                     <button
                       onClick={() => handleDisconnect(config.provider)}
                       disabled={disconnecting === config.provider}
-                      className="w-full px-4 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50 flex items-center justify-center"
+                      className="w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-all disabled:opacity-50 flex items-center justify-center border border-red-200 dark:border-red-800"
                     >
                       {disconnecting === config.provider ? (
                         <>
@@ -319,7 +319,7 @@ export default function IntegrationsPanel({ integrations: initialIntegrations }:
                   <button
                     onClick={() => handleConnect(config.provider)}
                     disabled={connecting === config.provider}
-                    className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center"
+                    className="w-full px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center"
                   >
                     {connecting === config.provider ? (
                       <>

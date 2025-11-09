@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Clock, TrendingUp } from 'lucide-react';
+import { CheckCircle2, Clock } from 'lucide-react';
 import OrganicCard from '@/components/shared/OrganicCard';
 
 interface DailyBriefProps {
@@ -22,7 +22,7 @@ export default function DailyBrief({
           <span className="mr-2">📊</span> Daily Snapshot
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Tasks Due Today */}
           <div className="flex items-start space-x-3 bg-sky-blue/20 p-4 rounded-2xl border border-sky-blue/30 hover:shadow-md transition-all duration-300">
             <div className="p-3 bg-sky-blue/40 rounded-full">
@@ -47,21 +47,6 @@ export default function DailyBrief({
               </p>
               <p className="text-3xl font-bold font-serif text-forest-green">
                 {tasksCompletedToday}
-              </p>
-            </div>
-          </div>
-
-          {/* Completion Percentage */}
-          <div className="flex items-start space-x-3 bg-sunflower-yellow/20 p-4 rounded-2xl border border-sunflower-yellow/30 hover:shadow-md transition-all duration-300">
-            <div className="p-3 bg-sunflower-yellow/40 rounded-full">
-              <TrendingUp className="w-6 h-6 text-forest-green" />
-            </div>
-            <div>
-              <p className="text-sm text-bark-brown font-medium">
-                Completion Rate
-              </p>
-              <p className="text-3xl font-bold font-serif text-forest-green">
-                {completionPercentage}%
               </p>
             </div>
           </div>
