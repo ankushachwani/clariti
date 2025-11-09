@@ -20,6 +20,16 @@ interface PriorityTasksProps {
 export default function PriorityTasks({ tasks }: PriorityTasksProps) {
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
 
+  const stripHtml = (html: string): string => {
+    // Remove HTML tags
+    const withoutTags = html.replace(/<[^>]*>/g, ' ');
+    // Decode HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = withoutTags;
+    // Clean up extra whitespace
+    return textarea.value.replace(/\s+/g, ' ').trim();
+  };
+
   const handleToggleComplete = async (taskId: string, completed: boolean) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
@@ -143,14 +153,22 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
                 {expandedTask === task.id && (
                   <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                     {task.aiSummary && (
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-                        {task.aiSummary}
-                      </p>
+                      <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                          AI Insight:
+                        </p>
+                        <p className="text-sm text-blue-800 dark:text-blue-300 mt-1">
+                          {task.aiSummary}
+                        </p>
+                      </div>
                     )}
                     {task.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {task.description}
-                      </p>
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {stripHtml(task.description).substring(0, 300)}
+                          {stripHtml(task.description).length > 300 ? '...' : ''}
+                        </p>
+                      </div>
                     )}
                     {task.sourceUrl && (
                       <a
@@ -159,7 +177,7 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                       >
-                        View Original
+                        View Original on {task.source === 'canvas' ? 'Canvas' : task.source}
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     )}

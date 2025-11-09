@@ -31,6 +31,16 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
+  const stripHtml = (html: string): string => {
+    // Remove HTML tags
+    const withoutTags = html.replace(/<[^>]*>/g, ' ');
+    // Decode HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = withoutTags;
+    // Clean up extra whitespace
+    return textarea.value.replace(/\s+/g, ' ').trim();
+  };
+
   const filteredTasks = useMemo(() => {
     let filtered = showCompleted
       ? tasks
@@ -213,8 +223,8 @@ export default function TasksList({ tasks: initialTasks }: TasksListProps) {
                             </p>
                           )}
                           {task.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                              {task.description}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                              {stripHtml(task.description)}
                             </p>
                           )}
                         </div>
