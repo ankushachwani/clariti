@@ -28,7 +28,57 @@ export async function POST(request: NextRequest) {
     });
 
     if (!account || !account.access_token) {
+      console.log('Google account not found or no access token');
       return NextResponse.json({ error: 'Google not connected' }, { status: 400 });
+    }
+
+    console.log('Google account found, access token exists');
+
+    // Check if token needs refresh
+    let accessToken = account.access_token;
+    if (account.expires_at && account.expires_at * 1000 < Date.now()) {
+      console.log('Access token expired, refreshing...');
+      
+      if (!account.refresh_token) {
+        console.error('No refresh token available');
+        return NextResponse.json({ error: 'Google token expired, please reconnect' }, { status: 400 });
+      }
+
+      try {
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: process.env.GOOGLE_CLIENT_ID!,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+            refresh_token: account.refresh_token,
+            grant_type: 'refresh_token',
+          }),
+        });
+
+        const tokens = await tokenResponse.json();
+        
+        if (tokens.access_token) {
+          accessToken = tokens.access_token;
+          
+          // Update account with new token
+          await prisma.account.update({
+            where: { id: account.id },
+            data: {
+              access_token: tokens.access_token,
+              expires_at: Math.floor(Date.now() / 1000) + tokens.expires_in,
+            },
+          });
+          
+          console.log('Token refreshed successfully');
+        } else {
+          console.error('Failed to refresh token:', tokens);
+          return NextResponse.json({ error: 'Failed to refresh Google token' }, { status: 400 });
+        }
+      } catch (refreshError) {
+        console.error('Token refresh error:', refreshError);
+        return NextResponse.json({ error: 'Failed to refresh Google token' }, { status: 400 });
+      }
     }
 
     // Delete all existing Gmail tasks to avoid duplicates
@@ -42,6 +92,8 @@ export async function POST(request: NextRequest) {
     let totalTasks = 0;
     let totalEvents = 0;
 
+    console.log('Starting Gmail sync...');
+
     // Enhanced search queries for academic/work-related emails
     const searchQueries = [
       'assignment OR homework OR project',
@@ -54,6 +106,8 @@ export async function POST(request: NextRequest) {
     ];
     
     const processedMessageIds = new Set<string>();
+    let totalMessagesFound = 0;
+    let filteredOut = 0;
     
     for (const query of searchQueries) {
       try {
@@ -61,18 +115,21 @@ export async function POST(request: NextRequest) {
           `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query + ' newer_than:2d')}&maxResults=30`,
           {
             headers: {
-              'Authorization': `Bearer ${account.access_token}`,
+              'Authorization': `Bearer ${accessToken}`,
             },
           }
         );
 
         if (!searchResponse.ok) {
-          console.log(`Failed to search Gmail for: ${query}`);
+          console.log(`Failed to search Gmail for: ${query}`, await searchResponse.text());
           continue;
         }
 
         const searchData = await searchResponse.json();
         const messages = searchData.messages || [];
+        
+        console.log(`Query "${query}" found ${messages.length} messages`);
+        totalMessagesFound += messages.length;
 
         for (const message of messages) {
           // Skip if already processed
@@ -85,7 +142,7 @@ export async function POST(request: NextRequest) {
               `https://gmail.googleapis.com/gmail/v1/users/me/messages/${message.id}?format=full`,
               {
                 headers: {
-                  'Authorization': `Bearer ${account.access_token}`,
+                  'Authorization': `Bearer ${accessToken}`,
                 },
               }
             );
@@ -126,7 +183,11 @@ export async function POST(request: NextRequest) {
             const hasUrgency = /urgent|asap|important|action\s+required|reminder/i.test(fullContent);
 
             // Only create tasks for emails with deadlines or important action items
-            if (!hasDeadline && !hasActionItem && !hasUrgency) continue;
+            if (!hasDeadline && !hasActionItem && !hasUrgency) {
+              filteredOut++;
+              console.log(`Filtered out email: "${subject}" (no deadline/action item/urgency)`);
+              continue;
+            }
 
             // Extract due date from content
             const extractedDate = extractDueDate(fullContent, receivedDate);
@@ -166,6 +227,7 @@ export async function POST(request: NextRequest) {
               },
             });
 
+            console.log(`Created task from email: "${subject}"`);
             totalTasks++;
 
             // If it's a meeting/interview with a specific time, also create a calendar event
@@ -206,11 +268,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log(`Gmail sync complete: ${totalMessagesFound} total messages, ${filteredOut} filtered out, ${totalTasks} tasks created`);
+
     return NextResponse.json({
       success: true,
-      message: `Synced ${totalTasks} emails and created ${totalEvents} calendar events from Gmail`,
+      message: `Synced ${totalTasks} emails and created ${totalEvents} calendar events from Gmail (${totalMessagesFound} messages scanned, ${filteredOut} filtered)`,
       taskCount: totalTasks,
       eventCount: totalEvents,
+      messagesScanned: totalMessagesFound,
+      filtered: filteredOut,
     });
   } catch (error) {
     console.error('Gmail sync error:', error);
