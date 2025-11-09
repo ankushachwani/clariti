@@ -84,6 +84,57 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
         </h2>
       </div>
 
+      {/* Test Email Button - Prominent at the top */}
+      <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                Test Daily Debrief Email
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Send yourself a preview email with your actual tasks
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleSendTestEmail}
+            disabled={sendingTest || !settings?.emailNotifications}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+          >
+            {sendingTest ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Sending...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                Send Test
+              </>
+            )}
+          </button>
+        </div>
+        
+        {/* Test Email Message */}
+        {testEmailMessage && (
+          <div className={`mt-3 p-3 rounded-lg text-sm font-semibold ${
+            testEmailMessage.type === 'success' 
+              ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border-2 border-green-300 dark:border-green-600'
+              : 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 border-2 border-red-300 dark:border-red-600'
+          }`}>
+            {testEmailMessage.text}
+          </div>
+        )}
+
+        {!settings?.emailNotifications && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 italic">
+            💡 Enable "Email Notifications" below to send test emails
+          </p>
+        )}
+      </div>
+
       <div className="space-y-4">
         {/* Daily Brief */}
         <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
@@ -162,53 +213,6 @@ export default function NotificationSettings({ settings: initialSettings }: Noti
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
           </label>
         </div>
-
-        {/* Test Email Button - Always visible when email notifications are enabled */}
-        {settings?.emailNotifications && (
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Test Daily Debrief Email
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Preview your personalized daily debrief with your actual tasks
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleSendTestEmail}
-                disabled={sendingTest}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-              >
-                {sendingTest ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Send Test Email
-                  </>
-                )}
-              </button>
-            </div>
-            
-            {/* Test Email Message */}
-            {testEmailMessage && (
-              <div className={`mt-3 p-3 rounded-lg text-sm font-medium ${
-                testEmailMessage.type === 'success' 
-                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700'
-                  : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700'
-              }`}>
-                {testEmailMessage.text}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
