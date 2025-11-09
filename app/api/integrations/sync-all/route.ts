@@ -91,6 +91,8 @@ export async function POST(request: NextRequest) {
         
         if (integration.provider === 'canvas') {
           syncUrl = `${baseUrl}/api/integrations/canvas/sync`;
+        } else if (integration.provider === 'slack') {
+          syncUrl = `${baseUrl}/api/integrations/slack/sync`;
         } else {
           continue; // Skip unsupported integrations
         }
