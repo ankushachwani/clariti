@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
     const courses = await coursesResponse.json();
     let totalItems = 0;
 
+    // Track processed items to avoid duplicates
+    const processedItems = new Set<string>();
+
     // For each course, fetch multiple types of content
     for (const course of courses) {
       try {
@@ -66,13 +69,23 @@ export async function POST(request: NextRequest) {
           const assignments = await assignmentsResponse.json();
 
           for (const assignment of assignments) {
+            const itemKey = `assignment_${assignment.id}`;
+            
+            // Skip if already processed in this sync
+            if (processedItems.has(itemKey)) continue;
+            processedItems.add(itemKey);
+
             const dueDate = assignment.due_at ? new Date(assignment.due_at) : null;
 
+            // Check for existing tasks with both old and new sourceId formats
             const existingTask = await prisma.task.findFirst({
               where: {
                 userId: user.id,
                 source: 'canvas',
-                sourceId: `assignment_${assignment.id}`,
+                OR: [
+                  { sourceId: `assignment_${assignment.id}` },
+                  { sourceId: assignment.id.toString() }, // Old format without prefix
+                ],
               },
             });
 
@@ -92,9 +105,13 @@ export async function POST(request: NextRequest) {
             };
 
             if (existingTask) {
+              // Update and ensure sourceId has correct prefix
               await prisma.task.update({
                 where: { id: existingTask.id },
-                data: taskData,
+                data: {
+                  ...taskData,
+                  sourceId: `assignment_${assignment.id}`, // Ensure proper prefix
+                },
               });
             } else {
               await prisma.task.create({
@@ -129,6 +146,12 @@ export async function POST(request: NextRequest) {
           thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
           for (const announcement of announcements) {
+            const itemKey = `announcement_${announcement.id}`;
+            
+            // Skip if already processed
+            if (processedItems.has(itemKey)) continue;
+            processedItems.add(itemKey);
+
             const postedDate = new Date(announcement.posted_at || announcement.created_at);
             
             if (postedDate < thirtyDaysAgo) continue;
@@ -189,6 +212,12 @@ export async function POST(request: NextRequest) {
           const quizzes = await quizzesResponse.json();
 
           for (const quiz of quizzes) {
+            const itemKey = `quiz_${quiz.id}`;
+            
+            // Skip if already processed
+            if (processedItems.has(itemKey)) continue;
+            processedItems.add(itemKey);
+
             const dueDate = quiz.due_at ? new Date(quiz.due_at) : null;
 
             const existingTask = await prisma.task.findFirst({
@@ -250,6 +279,12 @@ export async function POST(request: NextRequest) {
 
           for (const discussion of discussions) {
             if (discussion.is_announcement) continue;
+
+            const itemKey = `discussion_${discussion.id}`;
+            
+            // Skip if already processed
+            if (processedItems.has(itemKey)) continue;
+            processedItems.add(itemKey);
 
             const dueDate = discussion.assignment?.due_at ? new Date(discussion.assignment.due_at) : null;
 
