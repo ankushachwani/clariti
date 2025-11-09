@@ -44,8 +44,83 @@ export async function POST(request: NextRequest) {
     const accessToken = integration.accessToken;
     let totalItems = 0;
 
-    // Fetch user's saved/starred messages and reminders
+    // Fetch user's messages and reminders
     try {
+      // Get recent messages from channels the user is in (past 7 days)
+      const userInfoResponse = await fetch('https://slack.com/api/users.conversations', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (userInfoResponse.ok) {
+        const channelsData = await userInfoResponse.json();
+        
+        if (channelsData.ok && channelsData.channels) {
+          const sevenDaysAgo = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
+          
+          // Process up to 5 channels to avoid rate limits
+          for (const channel of channelsData.channels.slice(0, 5)) {
+            try {
+              // Get messages from this channel
+              const messagesResponse = await fetch(
+                `https://slack.com/api/conversations.history?channel=${channel.id}&oldest=${sevenDaysAgo}&limit=50`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                  },
+                }
+              );
+
+              if (!messagesResponse.ok) continue;
+
+              const messagesData = await messagesResponse.json();
+              
+              if (messagesData.ok && messagesData.messages) {
+                for (const message of messagesData.messages) {
+                  // Skip messages without text or from bots
+                  if (!message.text || message.bot_id) continue;
+
+                  const text = message.text;
+                  const timestamp = message.ts ? new Date(parseFloat(message.ts) * 1000) : new Date();
+                  
+                  // Use AI to analyze the message
+                  const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, channel.name);
+                  
+                  if (!aiAnalysis.isImportant || !aiAnalysis.dueDate) continue;
+
+                  const sourceId = `slack_msg_${message.ts}`;
+
+                  await prisma.task.create({
+                    data: {
+                      userId: user.id,
+                      source: 'slack',
+                      sourceId: sourceId,
+                      title: aiAnalysis.title,
+                      description: aiAnalysis.description,
+                      dueDate: aiAnalysis.dueDate,
+                      completed: false,
+                      category: 'email',
+                      sourceUrl: undefined,
+                      metadata: {
+                        channel: channel.name,
+                        type: 'message',
+                        aiDetermined: true,
+                        originalText: text.substring(0, 200),
+                      },
+                    },
+                  });
+
+                  totalItems++;
+                }
+              }
+            } catch (channelError) {
+              console.error(`Error processing channel ${channel.id}:`, channelError);
+            }
+          }
+        }
+      }
+
       // Get starred items
       const starsResponse = await fetch('https://slack.com/api/stars.list', {
         headers: {
@@ -65,7 +140,7 @@ export async function POST(request: NextRequest) {
             const timestamp = item.message.ts ? new Date(parseFloat(item.message.ts) * 1000) : new Date();
             
             // Use AI to analyze the message
-            const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp);
+            const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp, 'starred');
             
             if (!aiAnalysis.isImportant || !aiAnalysis.dueDate) continue;
 
@@ -76,16 +151,17 @@ export async function POST(request: NextRequest) {
                 userId: user.id,
                 source: 'slack',
                 sourceId: sourceId,
-                title: `⭐ ${text.substring(0, 100)}`,
-                description: text,
+                title: aiAnalysis.title,
+                description: aiAnalysis.description,
                 dueDate: aiAnalysis.dueDate,
                 completed: false,
-                category: 'email', // Using email category for Slack messages
+                category: 'email',
                 sourceUrl: item.message.permalink || undefined,
                 metadata: {
                   channel: item.channel,
                   type: 'starred',
                   aiDetermined: true,
+                  originalText: text.substring(0, 200),
                 },
               },
             });
@@ -164,8 +240,9 @@ export async function POST(request: NextRequest) {
 // Use AI to analyze Slack message and extract due date
 async function analyzeSlackMessageWithAI(
   text: string,
-  timestamp: Date
-): Promise<{ isImportant: boolean; dueDate: Date | null }> {
+  timestamp: Date,
+  channelName?: string
+): Promise<{ isImportant: boolean; dueDate: Date | null; title: string; description: string }> {
   try {
     const cohere = new CohereClient({
       token: process.env.COHERE_API_KEY,
@@ -175,17 +252,34 @@ async function analyzeSlackMessageWithAI(
     
     const prompt = `Today's date is ${currentDate}.
 
-Analyze this Slack message and respond with ONLY a JSON object (no markdown, no extra text):
+Analyze this Slack message${channelName ? ` from #${channelName}` : ''} and respond with ONLY a JSON object (no markdown, no extra text):
 
 Message: ${text.substring(0, 500)}
 
-Determine:
-1. Is this message important enough to track? (has action item, deadline, or something to follow up on)
-2. If there's a due date mentioned (like "tomorrow", "next week", "Friday", etc.), calculate the actual date
+Tasks:
+1. Determine if this is work/school related and has an actionable deadline
+2. If important, rewrite into a clear, concise task title
+3. If important, create a brief description of what needs to be done
+4. Extract the due date from natural language ("tomorrow", "next week", specific dates, etc.)
+
+Filter OUT:
+- Casual conversations
+- Social chit-chat
+- Memes, jokes
+- General updates without action items
+- Personal messages
+
+Keep:
+- Task assignments with deadlines
+- Meeting reminders with dates
+- Project deadlines
+- Important action items with time constraints
 
 JSON format:
 {
   "isImportant": true/false,
+  "title": "Clear task title" or null,
+  "description": "What needs to be done" or null,
   "dueDate": "YYYY-MM-DD" or null
 }`;
 
@@ -217,6 +311,8 @@ JSON format:
     return {
       isImportant: analysis.isImportant === true,
       dueDate: dueDate,
+      title: analysis.title || text.substring(0, 100),
+      description: analysis.description || text.substring(0, 300),
     };
   } catch (error) {
     console.error('AI analysis error for Slack:', error);
@@ -224,6 +320,8 @@ JSON format:
     return {
       isImportant: false,
       dueDate: null,
+      title: text.substring(0, 100),
+      description: text.substring(0, 300),
     };
   }
 }

@@ -188,9 +188,10 @@ export async function POST(request: NextRequest) {
             const dueDate = aiAnalysis.dueDate || null;
             const category = aiAnalysis.category || 'email';
 
+            // Use the AI-generated title and description (cleaned up and concise)
             const taskData = {
-              title: `📧 ${subject}`,
-              description: snippet,
+              title: aiAnalysis.title || `📧 ${subject}`,
+              description: aiAnalysis.description || snippet,
               dueDate: dueDate,
               completed: false,
               category: category,
@@ -199,6 +200,7 @@ export async function POST(request: NextRequest) {
                 from: from,
                 receivedDate: receivedDate.toISOString(),
                 aiDetermined: true,
+                originalSubject: subject,
                 type: 'email',
               },
             };
@@ -278,7 +280,7 @@ async function analyzeEmailWithAI(
   snippet: string,
   fullContent: string,
   receivedDate: Date
-): Promise<{ isImportant: boolean; dueDate: Date | null; category: string }> {
+): Promise<{ isImportant: boolean; dueDate: Date | null; category: string; title: string; description: string }> {
   try {
     const cohere = new CohereClient({
       token: process.env.COHERE_API_KEY,
@@ -293,16 +295,34 @@ Analyze this email and respond with ONLY a JSON object (no markdown, no extra te
 Subject: ${subject}
 Content: ${snippet.substring(0, 500)}
 
-Determine:
-1. Is this email important enough to track as a task? (important = needs action, has deadline, meeting, event, reminder, or anything the user should follow up on)
-2. If there's a due date mentioned (like "tomorrow", "next week", "Nov 15", etc.), calculate the actual date
-3. What category: "assignment", "meeting", "quiz", "email"
+Tasks:
+1. Determine if this is important and actionable (work/school related, not personal spam, birthdays, statements unless action needed)
+2. If important, rewrite the title to be clear and concise (remove "Re:", "Fwd:", make it actionable)
+3. If important, create a short description (1-2 sentences summarizing what needs to be done)
+4. Extract any due date from natural language
+5. Categorize appropriately
+
+Filter OUT:
+- Birthdays, personal celebrations
+- Credit card statements (unless payment due)
+- Marketing/promotional emails
+- Social media notifications
+- Newsletters
+
+Keep and rewrite:
+- Assignments, homework, projects
+- Meetings, interviews
+- Quizzes, exams
+- Important deadlines
+- Action required items
 
 JSON format:
 {
   "isImportant": true/false,
+  "title": "Clear, actionable title" or null,
+  "description": "What needs to be done" or null,
   "dueDate": "YYYY-MM-DD" or null,
-  "category": "assignment/meeting/quiz/email"
+  "category": "assignment/meeting/quiz/announcement/email"
 }`;
 
     const response = await cohere.chat({
@@ -334,6 +354,8 @@ JSON format:
       isImportant: analysis.isImportant === true,
       dueDate: dueDate,
       category: analysis.category || 'email',
+      title: analysis.title || `📧 ${subject}`,
+      description: analysis.description || snippet,
     };
   } catch (error) {
     console.error('AI analysis error:', error);
@@ -343,6 +365,8 @@ JSON format:
       isImportant: hasKeywords,
       dueDate: extractDueDate(fullContent, receivedDate),
       category: 'email',
+      title: `📧 ${subject}`,
+      description: snippet,
     };
   }
 }

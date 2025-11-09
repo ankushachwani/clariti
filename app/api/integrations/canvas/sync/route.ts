@@ -89,21 +89,22 @@ export async function POST(request: NextRequest) {
             // Skip assignments without due dates
             if (!dueDate) continue;
 
-            // Use AI to filter out unimportant items
-            const isImportant = await analyzeCanvasItemWithAI(
+            // Use AI to filter and rewrite Canvas items
+            const aiAnalysis = await analyzeCanvasItemWithAI(
               assignment.name,
               assignment.description || '',
-              'assignment'
+              'assignment',
+              course.name
             );
             
-            if (!isImportant) {
+            if (!aiAnalysis.isImportant) {
               console.log(`Filtered out Canvas item: "${assignment.name}" (AI determined not important)`);
               continue;
             }
 
             const taskData = {
-              title: assignment.name,
-              description: assignment.description || `Assignment for ${course.name}`,
+              title: aiAnalysis.title,
+              description: aiAnalysis.description,
               dueDate: dueDate,
               completed: assignment.has_submitted_submissions || false,
               category: 'assignment',
@@ -113,6 +114,7 @@ export async function POST(request: NextRequest) {
                 points: assignment.points_possible,
                 submissionTypes: assignment.submission_types,
                 type: 'assignment',
+                originalTitle: assignment.name,
               },
             };
 
@@ -209,21 +211,22 @@ export async function POST(request: NextRequest) {
             // Skip quizzes without due dates
             if (!dueDate) continue;
 
-            // Use AI to filter out unimportant items
-            const isImportant = await analyzeCanvasItemWithAI(
+            // Use AI to filter and rewrite Canvas items
+            const aiAnalysis = await analyzeCanvasItemWithAI(
               quiz.title,
               quiz.description || '',
-              'quiz'
+              'quiz',
+              course.name
             );
             
-            if (!isImportant) {
+            if (!aiAnalysis.isImportant) {
               console.log(`Filtered out Canvas item: "${quiz.title}" (AI determined not important)`);
               continue;
             }
 
             const taskData = {
-              title: `📝 ${quiz.title}`,
-              description: quiz.description || `Quiz for ${course.name}`,
+              title: aiAnalysis.title,
+              description: aiAnalysis.description,
               dueDate: dueDate,
               completed: false,
               category: 'quiz',
@@ -234,6 +237,7 @@ export async function POST(request: NextRequest) {
                 timeLimit: quiz.time_limit,
                 allowedAttempts: quiz.allowed_attempts,
                 type: 'quiz',
+                originalTitle: quiz.title,
               },
             };
 
@@ -277,21 +281,22 @@ export async function POST(request: NextRequest) {
             // Skip discussions without due dates
             if (!dueDate) continue;
 
-            // Use AI to filter out unimportant items
-            const isImportant = await analyzeCanvasItemWithAI(
+            // Use AI to filter and rewrite Canvas items
+            const aiAnalysis = await analyzeCanvasItemWithAI(
               discussion.title,
               discussion.message || '',
-              'discussion'
+              'discussion',
+              course.name
             );
             
-            if (!isImportant) {
+            if (!aiAnalysis.isImportant) {
               console.log(`Filtered out Canvas item: "${discussion.title}" (AI determined not important)`);
               continue;
             }
 
             const taskData = {
-              title: `💬 ${discussion.title}`,
-              description: discussion.message || 'Discussion topic',
+              title: aiAnalysis.title,
+              description: aiAnalysis.description,
               dueDate: dueDate,
               completed: false,
               category: 'discussion',
@@ -300,6 +305,7 @@ export async function POST(request: NextRequest) {
               metadata: {
                 requiresInitialPost: discussion.require_initial_post,
                 type: 'discussion',
+                originalTitle: discussion.title,
               },
             };
 
@@ -345,36 +351,42 @@ export async function POST(request: NextRequest) {
 async function analyzeCanvasItemWithAI(
   title: string,
   description: string,
-  type: string
-): Promise<boolean> {
+  type: string,
+  courseName: string
+): Promise<{ isImportant: boolean; title: string; description: string }> {
   try {
     const cohere = new CohereClient({
       token: process.env.COHERE_API_KEY,
     });
 
-    const prompt = `Analyze this Canvas ${type} and determine if it's important enough to track.
+    const prompt = `Analyze this Canvas ${type} from ${courseName}.
 
 Title: ${title}
 Description: ${description.substring(0, 300)}
 
-Filter OUT these types of items:
+Tasks:
+1. Determine if this is important (not attendance/participation checks)
+2. If important, rewrite the title to be clear and concise
+3. If important, create a brief description of what needs to be done
+
+Filter OUT:
 - Attendance quizzes
 - Participation checks
-- Simple confirmation/acknowledgment tasks
-- Automatic/system-generated items
-- Non-graded activities
+- Simple confirmations
+- Auto-generated items
 
-Keep these types of items:
+Keep and rewrite:
 - Graded assignments
 - Important quizzes/exams
 - Projects
 - Presentations
-- Homework with substantial work
-- Important discussions
+- Substantial homework
 
-Respond with ONLY a JSON object (no markdown):
+JSON format:
 {
-  "isImportant": true/false
+  "isImportant": true/false,
+  "title": "Clear, actionable title" or null,
+  "description": "What needs to be done" or null
 }`;
 
     const response = await cohere.chat({
@@ -390,7 +402,11 @@ Respond with ONLY a JSON object (no markdown):
     }
     
     const analysis = JSON.parse(jsonText);
-    return analysis.isImportant === true;
+    return {
+      isImportant: analysis.isImportant === true,
+      title: analysis.title || title,
+      description: analysis.description || description || `${type} for ${courseName}`,
+    };
   } catch (error) {
     console.error('AI analysis error for Canvas:', error);
     // Fallback: filter out obvious attendance/participation items
@@ -401,8 +417,8 @@ Respond with ONLY a JSON object (no markdown):
       lowerTitle.includes('check-in') ||
       lowerTitle.includes('roll call')
     ) {
-      return false;
+      return { isImportant: false, title: title, description: description };
     }
-    return true; // Default to including if AI fails
+    return { isImportant: true, title: title, description: description || `${type} for ${courseName}` };
   }
 }
