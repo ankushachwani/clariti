@@ -27,7 +27,7 @@ ${input.text}
 Summary:`;
 
     const response = await cohere.chat({
-      model: 'command-light',
+      model: 'command-r7b-12-2024',
       message: message,
       maxTokens: 100,
       temperature: 0.3,
@@ -70,7 +70,7 @@ Urgency: [1-10]
 Reasoning: [brief explanation]`;
 
     const response = await cohere.chat({
-      model: 'command-light',
+      model: 'command-r7b-12-2024',
       message: message,
       maxTokens: 150,
       temperature: 0.3,
@@ -166,7 +166,7 @@ ${taskList}
 Provide practical advice on prioritization and time management. Keep it concise, actionable, and motivating.`;
 
     const response = await cohere.chat({
-      model: 'command-light',
+      model: 'command-r7b-12-2024',
       message: message,
       maxTokens: 150,
       temperature: 0.7,
