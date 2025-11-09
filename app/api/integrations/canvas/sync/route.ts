@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import prisma from '@/lib/prisma';
+import { CohereClient } from 'cohere-ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -87,6 +88,18 @@ export async function POST(request: NextRequest) {
             
             // Skip assignments without due dates
             if (!dueDate) continue;
+
+            // Use AI to filter out unimportant items
+            const isImportant = await analyzeCanvasItemWithAI(
+              assignment.name,
+              assignment.description || '',
+              'assignment'
+            );
+            
+            if (!isImportant) {
+              console.log(`Filtered out Canvas item: "${assignment.name}" (AI determined not important)`);
+              continue;
+            }
 
             const taskData = {
               title: assignment.name,
@@ -196,6 +209,18 @@ export async function POST(request: NextRequest) {
             // Skip quizzes without due dates
             if (!dueDate) continue;
 
+            // Use AI to filter out unimportant items
+            const isImportant = await analyzeCanvasItemWithAI(
+              quiz.title,
+              quiz.description || '',
+              'quiz'
+            );
+            
+            if (!isImportant) {
+              console.log(`Filtered out Canvas item: "${quiz.title}" (AI determined not important)`);
+              continue;
+            }
+
             const taskData = {
               title: `📝 ${quiz.title}`,
               description: quiz.description || `Quiz for ${course.name}`,
@@ -252,6 +277,18 @@ export async function POST(request: NextRequest) {
             // Skip discussions without due dates
             if (!dueDate) continue;
 
+            // Use AI to filter out unimportant items
+            const isImportant = await analyzeCanvasItemWithAI(
+              discussion.title,
+              discussion.message || '',
+              'discussion'
+            );
+            
+            if (!isImportant) {
+              console.log(`Filtered out Canvas item: "${discussion.title}" (AI determined not important)`);
+              continue;
+            }
+
             const taskData = {
               title: `💬 ${discussion.title}`,
               description: discussion.message || 'Discussion topic',
@@ -301,5 +338,71 @@ export async function POST(request: NextRequest) {
       { error: 'Failed to sync Canvas data' },
       { status: 500 }
     );
+  }
+}
+
+// Use AI to determine if Canvas item is important (filter out attendance, participation quizzes, etc.)
+async function analyzeCanvasItemWithAI(
+  title: string,
+  description: string,
+  type: string
+): Promise<boolean> {
+  try {
+    const cohere = new CohereClient({
+      token: process.env.COHERE_API_KEY,
+    });
+
+    const prompt = `Analyze this Canvas ${type} and determine if it's important enough to track.
+
+Title: ${title}
+Description: ${description.substring(0, 300)}
+
+Filter OUT these types of items:
+- Attendance quizzes
+- Participation checks
+- Simple confirmation/acknowledgment tasks
+- Automatic/system-generated items
+- Non-graded activities
+
+Keep these types of items:
+- Graded assignments
+- Important quizzes/exams
+- Projects
+- Presentations
+- Homework with substantial work
+- Important discussions
+
+Respond with ONLY a JSON object (no markdown):
+{
+  "isImportant": true/false
+}`;
+
+    const response = await cohere.chat({
+      model: 'command-r',
+      message: prompt,
+      temperature: 0.3,
+    });
+
+    const responseText = response.text.trim();
+    let jsonText = responseText;
+    if (jsonText.includes('```')) {
+      jsonText = jsonText.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+    }
+    
+    const analysis = JSON.parse(jsonText);
+    return analysis.isImportant === true;
+  } catch (error) {
+    console.error('AI analysis error for Canvas:', error);
+    // Fallback: filter out obvious attendance/participation items
+    const lowerTitle = title.toLowerCase();
+    if (
+      lowerTitle.includes('attendance') ||
+      lowerTitle.includes('participation') ||
+      lowerTitle.includes('check-in') ||
+      lowerTitle.includes('roll call')
+    ) {
+      return false;
+    }
+    return true; // Default to including if AI fails
   }
 }
