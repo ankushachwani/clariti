@@ -67,14 +67,7 @@ export async function POST(request: NextRequest) {
 
         // Create/update tasks for each assignment
         for (const assignment of assignments) {
-          // Skip if no due date or already submitted
-          if (!assignment.due_at) continue;
-
-          const dueDate = new Date(assignment.due_at);
-          const now = new Date();
-
-          // Only sync future assignments or those due in the last week
-          if (dueDate < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) continue;
+          const dueDate = assignment.due_at ? new Date(assignment.due_at) : null;
 
           // Check if task already exists
           const existingTask = await prisma.task.findFirst({
