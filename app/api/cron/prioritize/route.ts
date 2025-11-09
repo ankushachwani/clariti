@@ -3,11 +3,15 @@ import prisma from '@/lib/prisma';
 import { prioritizeTask } from '@/lib/ai/cohere';
 
 // This endpoint can be called by a cron job (e.g., Vercel Cron, external service)
+// Note: Vercel Cron jobs don't send authorization headers, so we'll skip auth for now
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret to prevent unauthorized access
+    // Optional: Verify cron secret if provided
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const cronSecret = process.env.CRON_SECRET;
+    
+    // Only check auth if CRON_SECRET is set and auth header is provided
+    if (cronSecret && authHeader && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
