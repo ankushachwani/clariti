@@ -65,13 +65,20 @@ export async function POST(request: NextRequest) {
 
         // Hard filter: Immediately reject obvious personal events
         const lowerTitle = title.toLowerCase();
+        const lowerDesc = description.toLowerCase();
         if (
           lowerTitle.includes('birthday') ||
           lowerTitle.includes('bday') ||
-          lowerTitle.includes("'s birthday") ||
+          lowerTitle.includes('b-day') ||
+          lowerTitle.includes('bday') ||
+          lowerTitle.match(/\b\w+\'s\s+b.*day/i) || // Matches "Brady's Bday", "John's Birthday", etc
+          lowerDesc.includes('birthday') ||
+          lowerDesc.includes('bday') ||
           lowerTitle.includes('anniversary') ||
           lowerTitle.includes('party') ||
-          lowerTitle.includes('celebration')
+          lowerTitle.includes('celebration') ||
+          lowerTitle.includes('wedding') ||
+          lowerTitle.includes('shower')
         ) {
           console.log(`Hard filtered calendar event: "${title}" (obvious personal event)`);
           continue;
@@ -161,30 +168,33 @@ async function analyzeCalendarEventWithAI(
       token: process.env.COHERE_API_KEY,
     });
 
-    const prompt = `Analyze this calendar event and determine if it's work or school related.
+    const prompt = `Analyze this calendar event and determine if it requires ACTION or is just FYI.
 
 Title: ${title}
 Description: ${description.substring(0, 200)}
 
-Tasks:
-1. Determine if this is work/school related (not personal/social)
-2. If important, rewrite the title to be clear and actionable
-3. If important, create a concise description of what to prepare/bring/do
+CRITICAL: Only mark isImportant=true if this is something the user must ATTEND or PREPARE FOR.
 
-Filter OUT personal events:
-- Birthdays, celebrations
-- Personal social gatherings
-- Personal appointments
-- Holidays
+Mark isImportant=FALSE for:
+- Birthdays, celebrations, parties (e.g., "Brady's Bday", "Birthday party")
+- Personal social events
+- Reminders without action needed
+- FYI calendar blocks
+- Holidays, personal time off
+- Generic reminders
 
-Keep work/school events:
-- Classes, lectures
-- Meetings, interviews
-- Office hours, study groups
-- Work appointments
-- Academic deadlines
+Mark isImportant=TRUE only for:
+- Classes, lectures you must attend
+- Meetings, interviews you're required to join
+- Exams, tests, quizzes
+- Office hours, presentations
+- Work meetings, client calls
+- Study sessions, group projects
+- Events requiring preparation or attendance
 
-JSON format:
+If isImportant=true, rewrite the title to be clear and actionable.
+
+Respond with ONLY a JSON object (no markdown):
 {
   "isImportant": true/false,
   "title": "Clear meeting title" or null,

@@ -183,13 +183,21 @@ export async function POST(request: NextRequest) {
             if (
               lowerSubject.includes('birthday') ||
               lowerSubject.includes('bday') ||
-              lowerSubject.includes("'s birthday") ||
+              lowerSubject.includes('b-day') ||
               lowerContent.includes('happy birthday') ||
-              (lowerSubject.includes('statement') && !lowerContent.includes('payment due')) ||
-              (lowerSubject.includes('credit card') && !lowerContent.includes('payment due')) ||
+              lowerSubject.includes('statement is available') ||
+              lowerSubject.includes('statement is ready') ||
+              lowerSubject.includes('your statement') ||
+              lowerContent.includes('statement is available') ||
+              lowerContent.includes('view statement') && lowerContent.includes('balance') ||
+              lowerSubject.includes('credit card statement') ||
+              lowerSubject.includes('bank statement') ||
+              (lowerSubject.includes('statement') && !lowerContent.includes('payment due') && !lowerContent.includes('due date')) ||
+              (lowerSubject.includes('credit card') && !lowerContent.includes('payment due') && !lowerContent.includes('due date')) ||
               lowerSubject.includes('promotional') ||
               lowerSubject.includes('newsletter') ||
-              lowerSubject.includes('unsubscribe')
+              lowerSubject.includes('unsubscribe') ||
+              lowerContent.includes('minimum payment due') && !lowerContent.includes('action required')
             ) {
               filteredOut++;
               console.log(`Hard filtered email: "${subject}" (obvious personal/promotional)`);
@@ -310,33 +318,34 @@ async function analyzeEmailWithAI(
     
     const prompt = `Today's date is ${currentDate}.
 
-Analyze this email and respond with ONLY a JSON object (no markdown, no extra text):
+Analyze this email and determine if it's an ACTIONABLE TASK or just an announcement/notification.
 
 Subject: ${subject}
 Content: ${snippet.substring(0, 500)}
 
-Tasks:
-1. Determine if this is important and actionable (work/school related, not personal spam, birthdays, statements unless action needed)
-2. If important, rewrite the title to be clear and concise (remove "Re:", "Fwd:", make it actionable)
-3. If important, create a short description (1-2 sentences summarizing what needs to be done)
-4. Extract any due date from natural language
-5. Categorize appropriately
+CRITICAL: Only mark isImportant=true if this requires the user to DO SOMETHING with a deadline.
 
-Filter OUT:
-- Birthdays, personal celebrations
-- Credit card statements (unless payment due)
-- Marketing/promotional emails
-- Social media notifications
-- Newsletters
+Mark isImportant=FALSE for:
+- Birthdays, celebrations, personal events (e.g., "Brady's Bday", "John's birthday party")
+- Credit card/bank statements that are just informational (e.g., "Your statement is available" with no payment due)
+- Marketing, promotions, newsletters
+- Social media notifications, updates
+- FYI announcements with no action needed
+- Class cancelled notices
+- General updates or news
+- Confirmations of already-completed actions
 
-Keep and rewrite:
-- Assignments, homework, projects
-- Meetings, interviews
-- Quizzes, exams
-- Important deadlines
-- Action required items
+Mark isImportant=TRUE only for:
+- Assignments, homework, projects WITH a deadline
+- Quizzes, exams, tests WITH a specific date
+- Meetings, interviews WITH a time you must attend
+- Bills with payment due dates requiring action
+- Items explicitly saying "action required", "please submit", "due by"
+- Things you need to complete, attend, or respond to
 
-JSON format:
+If isImportant=true, rewrite the title to be clear and actionable (remove "Re:", "Fwd:", email fluff).
+
+Respond with ONLY a JSON object (no markdown):
 {
   "isImportant": true/false,
   "title": "Clear, actionable title" or null,

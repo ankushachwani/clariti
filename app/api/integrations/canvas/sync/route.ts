@@ -359,33 +359,36 @@ async function analyzeCanvasItemWithAI(
       token: process.env.COHERE_API_KEY,
     });
 
-    const prompt = `Analyze this Canvas ${type} from ${courseName}.
+    const prompt = `Analyze this Canvas ${type} from ${courseName} and determine if it requires ACTION.
 
 Title: ${title}
 Description: ${description.substring(0, 300)}
 
-Tasks:
-1. Determine if this is important (not attendance/participation checks)
-2. If important, rewrite the title to be clear and concise
-3. If important, create a brief description of what needs to be done
+CRITICAL: Only mark isImportant=true if this requires work/submission with a grade.
 
-Filter OUT:
-- Attendance quizzes
+Mark isImportant=FALSE for:
+- Attendance quizzes (e.g., "Attendance Quiz", "Check-in")
 - Participation checks
-- Simple confirmations
-- Auto-generated items
+- Simple confirmations ("I read the syllabus")
+- Practice/optional exercises explicitly marked as ungraded
+- Announcements about cancelled class
+- General FYI announcements
 
-Keep and rewrite:
-- Graded assignments
-- Important quizzes/exams
-- Projects
-- Presentations
-- Substantial homework
+Mark isImportant=TRUE only for:
+- Graded assignments worth points
+- Graded quizzes and exams
+- Projects, papers, presentations
+- Required discussion posts
+- Homework with due dates
+- Lab reports
+- Things that affect your grade
 
-JSON format:
+If isImportant=true, rewrite the title to be clear (include course if helpful).
+
+Respond with ONLY a JSON object (no markdown):
 {
   "isImportant": true/false,
-  "title": "Clear, actionable title" or null,
+  "title": "Clear assignment title" or null,
   "description": "What needs to be done" or null
 }`;
 

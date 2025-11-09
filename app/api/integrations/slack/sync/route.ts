@@ -252,30 +252,30 @@ async function analyzeSlackMessageWithAI(
     
     const prompt = `Today's date is ${currentDate}.
 
-Analyze this Slack message${channelName ? ` from #${channelName}` : ''} and respond with ONLY a JSON object (no markdown, no extra text):
+Analyze this Slack message${channelName ? ` from #${channelName}` : ''} and determine if it's an ACTIONABLE TASK.
 
 Message: ${text.substring(0, 500)}
 
-Tasks:
-1. Determine if this is work/school related and has an actionable deadline
-2. If important, rewrite into a clear, concise task title
-3. If important, create a brief description of what needs to be done
-4. Extract the due date from natural language ("tomorrow", "next week", specific dates, etc.)
+CRITICAL: Only mark isImportant=true if this requires someone to DO SOMETHING with a deadline.
 
-Filter OUT:
-- Casual conversations
-- Social chit-chat
-- Memes, jokes
-- General updates without action items
-- Personal messages
+Mark isImportant=FALSE for:
+- Casual conversations, chit-chat
+- Social messages, memes, jokes
+- FYI updates with no action needed
+- General announcements without deadlines
+- "Thanks", "Got it", acknowledgments
+- Questions without deadlines
 
-Keep:
-- Task assignments with deadlines
-- Meeting reminders with dates
-- Project deadlines
-- Important action items with time constraints
+Mark isImportant=TRUE only for:
+- Task assignments with deadlines (e.g., "Can you finish X by Friday?")
+- Project deadlines mentioned
+- Meeting reminders with specific times to attend
+- Code review requests with due dates
+- Action items from meetings
 
-JSON format:
+If isImportant=true, rewrite into a clear task title and extract the deadline.
+
+Respond with ONLY a JSON object (no markdown):
 {
   "isImportant": true/false,
   "title": "Clear task title" or null,
