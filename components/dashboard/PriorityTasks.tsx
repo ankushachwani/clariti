@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import confetti from 'canvas-confetti';
 
 interface PriorityTasksProps {
   tasks: any[];
@@ -30,6 +31,37 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
     return textarea.value.replace(/\s+/g, ' ').trim();
   };
 
+  const triggerConfetti = () => {
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: any = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+    }, 250);
+  };
+
   const handleToggleComplete = async (taskId: string, completed: boolean) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
@@ -39,7 +71,14 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
       });
 
       if (response.ok) {
-        window.location.reload();
+        // Trigger confetti if task was just completed
+        if (!completed) {
+          triggerConfetti();
+          // Wait a bit for confetti to show before reload
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          window.location.reload();
+        }
       }
     } catch (error) {
       console.error('Error updating task:', error);

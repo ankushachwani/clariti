@@ -143,7 +143,11 @@ export default function OnboardingIntegrations({ integrations, userName }: Onboa
     router.push('/dashboard');
   };
 
-  const connectedCount = integrations.filter(i => i.isConnected).length + 2; // +2 for Gmail & Calendar
+  // Calculate connected count properly
+  const connectedCount = integrationOptions.filter(option => {
+    if (option.alreadyConnected) return true; // Gmail and Calendar via Google OAuth
+    return integrations.some(i => i.provider === option.id && i.isConnected);
+  }).length;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
