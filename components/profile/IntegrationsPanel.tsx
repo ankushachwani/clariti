@@ -37,18 +37,6 @@ const INTEGRATION_CONFIGS = [
     description: 'Monitor team project communications',
     icon: '💬',
   },
-  {
-    provider: 'discord',
-    name: 'Discord',
-    description: 'Track course server announcements',
-    icon: '🎮',
-  },
-  {
-    provider: 'notion',
-    name: 'Notion',
-    description: 'Import personal notes and tasks',
-    icon: '📝',
-  },
 ];
 
 export default function IntegrationsPanel({ integrations: initialIntegrations }: IntegrationsPanelProps) {

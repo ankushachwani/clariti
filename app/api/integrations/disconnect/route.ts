@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
           // User needs to manually revoke from Canvas settings
           console.log('Canvas token should be manually revoked from Canvas settings');
         }
-        // Add more providers as needed (Discord, Notion, etc.)
       } catch (revokeError) {
         console.error('Error revoking token:', revokeError);
         // Continue to delete from database even if revoke fails
