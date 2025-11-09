@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import prisma from '@/lib/prisma';
+import { CohereClient } from 'cohere-ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,15 +95,12 @@ export async function POST(request: NextRequest) {
 
     console.log('Starting Gmail sync...');
 
-    // Enhanced search queries for academic/work-related emails
+    // Search for all emails from the past 2 days (not just academic)
     const searchQueries = [
-      'assignment OR homework OR project',
-      'deadline OR "due date" OR "due by"',
-      'exam OR quiz OR test',
-      'presentation OR submit OR submission',
-      'meeting OR interview OR appointment',
-      'reminder OR action required',
-      'grade OR feedback OR review',
+      'is:important',
+      'is:starred',
+      'has:attachment',
+      '', // All emails from past 2 days
     ];
     
     const processedMessageIds = new Set<string>();
@@ -111,8 +109,9 @@ export async function POST(request: NextRequest) {
     
     for (const query of searchQueries) {
       try {
+        const searchQuery = query ? `${query} newer_than:2d` : 'newer_than:2d';
         const searchResponse = await fetch(
-          `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query + ' newer_than:2d')}&maxResults=30`,
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(searchQuery)}&maxResults=50`,
           {
             headers: {
               'Authorization': `Bearer ${accessToken}`,
@@ -177,31 +176,17 @@ export async function POST(request: NextRequest) {
             const snippet = messageData.snippet || emailBody.substring(0, 500);
             const fullContent = subject + ' ' + emailBody;
 
-            // Check if email is important (has deadline/action items)
-            const hasDeadline = /deadline|due\s+(date|by|on)|submit\s+by|turn\s+in|hand\s+in/i.test(fullContent);
-            const hasActionItem = /assignment|homework|project|quiz|exam|test|meeting|interview|presentation/i.test(fullContent);
-            const hasUrgency = /urgent|asap|important|action\s+required|reminder/i.test(fullContent);
-
-            // Only create tasks for emails with deadlines or important action items
-            if (!hasDeadline && !hasActionItem && !hasUrgency) {
+            // Use AI to determine if email is important and extract due date
+            const aiAnalysis = await analyzeEmailWithAI(subject, snippet, fullContent, receivedDate);
+            
+            if (!aiAnalysis.isImportant) {
               filteredOut++;
-              console.log(`Filtered out email: "${subject}" (no deadline/action item/urgency)`);
+              console.log(`Filtered out email: "${subject}" (AI determined not important)`);
               continue;
             }
 
-            // Extract due date from content
-            const extractedDate = extractDueDate(fullContent, receivedDate);
-            const dueDate = extractedDate || null;
-
-            // Determine category
-            let category = 'email';
-            if (/meeting|interview|appointment/i.test(fullContent)) {
-              category = 'meeting';
-            } else if (/exam|quiz|test/i.test(fullContent)) {
-              category = 'quiz';
-            } else if (/assignment|homework|project/i.test(fullContent)) {
-              category = 'assignment';
-            }
+            const dueDate = aiAnalysis.dueDate || null;
+            const category = aiAnalysis.category || 'email';
 
             const taskData = {
               title: `📧 ${subject}`,
@@ -213,7 +198,7 @@ export async function POST(request: NextRequest) {
               metadata: {
                 from: from,
                 receivedDate: receivedDate.toISOString(),
-                hasDeadline: hasDeadline,
+                aiDetermined: true,
                 type: 'email',
               },
             };
@@ -284,6 +269,81 @@ export async function POST(request: NextRequest) {
       { error: 'Failed to sync Gmail data' },
       { status: 500 }
     );
+  }
+}
+
+// Use AI to analyze if email is important and extract due date
+async function analyzeEmailWithAI(
+  subject: string,
+  snippet: string,
+  fullContent: string,
+  receivedDate: Date
+): Promise<{ isImportant: boolean; dueDate: Date | null; category: string }> {
+  try {
+    const cohere = new CohereClient({
+      token: process.env.COHERE_API_KEY,
+    });
+
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    const prompt = `Today's date is ${currentDate}.
+
+Analyze this email and respond with ONLY a JSON object (no markdown, no extra text):
+
+Subject: ${subject}
+Content: ${snippet.substring(0, 500)}
+
+Determine:
+1. Is this email important enough to track as a task? (important = needs action, has deadline, meeting, event, reminder, or anything the user should follow up on)
+2. If there's a due date mentioned (like "tomorrow", "next week", "Nov 15", etc.), calculate the actual date
+3. What category: "assignment", "meeting", "quiz", "email"
+
+JSON format:
+{
+  "isImportant": true/false,
+  "dueDate": "YYYY-MM-DD" or null,
+  "category": "assignment/meeting/quiz/email"
+}`;
+
+    const response = await cohere.chat({
+      model: 'command-r',
+      message: prompt,
+      temperature: 0.3,
+    });
+
+    const responseText = response.text.trim();
+    
+    // Extract JSON from response (remove markdown code blocks if present)
+    let jsonText = responseText;
+    if (jsonText.includes('```')) {
+      jsonText = jsonText.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+    }
+    
+    const analysis = JSON.parse(jsonText);
+    
+    // Parse the due date if provided
+    let dueDate: Date | null = null;
+    if (analysis.dueDate) {
+      dueDate = new Date(analysis.dueDate);
+      if (isNaN(dueDate.getTime())) {
+        dueDate = null;
+      }
+    }
+    
+    return {
+      isImportant: analysis.isImportant === true,
+      dueDate: dueDate,
+      category: analysis.category || 'email',
+    };
+  } catch (error) {
+    console.error('AI analysis error:', error);
+    // Fallback to basic filtering if AI fails
+    const hasKeywords = /deadline|due|submit|meeting|interview|appointment|reminder|urgent|important|assignment|homework|project|quiz|exam|test/i.test(subject + ' ' + snippet);
+    return {
+      isImportant: hasKeywords,
+      dueDate: extractDueDate(fullContent, receivedDate),
+      category: 'email',
+    };
   }
 }
 

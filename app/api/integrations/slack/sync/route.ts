@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import prisma from '@/lib/prisma';
+import { CohereClient } from 'cohere-ai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,11 +64,10 @@ export async function POST(request: NextRequest) {
             const text = item.message.text;
             const timestamp = item.message.ts ? new Date(parseFloat(item.message.ts) * 1000) : new Date();
             
-            // Extract potential due dates from message
-            const dueDate = extractDueDateFromText(text, timestamp);
+            // Use AI to analyze the message
+            const aiAnalysis = await analyzeSlackMessageWithAI(text, timestamp);
             
-            // Only include if it has a due date
-            if (!dueDate) continue;
+            if (!aiAnalysis.isImportant || !aiAnalysis.dueDate) continue;
 
             const sourceId = `slack_star_${item.message.ts || item.date_create}`;
 
@@ -78,13 +78,14 @@ export async function POST(request: NextRequest) {
                 sourceId: sourceId,
                 title: `⭐ ${text.substring(0, 100)}`,
                 description: text,
-                dueDate: dueDate,
+                dueDate: aiAnalysis.dueDate,
                 completed: false,
                 category: 'email', // Using email category for Slack messages
                 sourceUrl: item.message.permalink || undefined,
                 metadata: {
                   channel: item.channel,
                   type: 'starred',
+                  aiDetermined: true,
                 },
               },
             });
@@ -160,7 +161,74 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Extract potential due dates from Slack message text
+// Use AI to analyze Slack message and extract due date
+async function analyzeSlackMessageWithAI(
+  text: string,
+  timestamp: Date
+): Promise<{ isImportant: boolean; dueDate: Date | null }> {
+  try {
+    const cohere = new CohereClient({
+      token: process.env.COHERE_API_KEY,
+    });
+
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    const prompt = `Today's date is ${currentDate}.
+
+Analyze this Slack message and respond with ONLY a JSON object (no markdown, no extra text):
+
+Message: ${text.substring(0, 500)}
+
+Determine:
+1. Is this message important enough to track? (has action item, deadline, or something to follow up on)
+2. If there's a due date mentioned (like "tomorrow", "next week", "Friday", etc.), calculate the actual date
+
+JSON format:
+{
+  "isImportant": true/false,
+  "dueDate": "YYYY-MM-DD" or null
+}`;
+
+    const response = await cohere.chat({
+      model: 'command-r',
+      message: prompt,
+      temperature: 0.3,
+    });
+
+    const responseText = response.text.trim();
+    
+    // Extract JSON from response
+    let jsonText = responseText;
+    if (jsonText.includes('```')) {
+      jsonText = jsonText.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+    }
+    
+    const analysis = JSON.parse(jsonText);
+    
+    // Parse the due date
+    let dueDate: Date | null = null;
+    if (analysis.dueDate) {
+      dueDate = new Date(analysis.dueDate);
+      if (isNaN(dueDate.getTime())) {
+        dueDate = null;
+      }
+    }
+    
+    return {
+      isImportant: analysis.isImportant === true,
+      dueDate: dueDate,
+    };
+  } catch (error) {
+    console.error('AI analysis error for Slack:', error);
+    // Fallback
+    return {
+      isImportant: false,
+      dueDate: null,
+    };
+  }
+}
+
+// Extract potential due dates from Slack message text (fallback)
 function extractDueDateFromText(text: string, referenceDate: Date): Date | null {
   const lowerText = text.toLowerCase();
   

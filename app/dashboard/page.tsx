@@ -99,7 +99,7 @@ export default async function DashboardPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {greeting}, {user.name?.split(' ')[0] || 'there'}!
             </h1>
-            <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold mt-1">
+            <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold mt-1" suppressHydrationWarning>
               {motivationalMessage}
             </p>
           </div>
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
             <span className="mr-2">🎯</span>
             Your Roadmap for Success
           </h2>
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed" suppressHydrationWarning>
             {roadmap}
           </p>
         </div>
