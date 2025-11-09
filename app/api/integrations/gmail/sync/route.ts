@@ -340,40 +340,45 @@ async function analyzeEmailWithAI(
     
     const prompt = `Today's date is ${currentDate}.
 
-Analyze this email and determine if it's important for a STUDENT/PROFESSIONAL.
+Analyze this email and categorize it for a STUDENT/PROFESSIONAL.
 
 Subject: ${subject}
 Content: ${snippet.substring(0, 500)}
 
 Mark isImportant=TRUE for:
-- Assignments, homework, projects (even without explicit deadline if from professor/instructor)
-- Quizzes, exams, tests
-- Meetings, interviews, office hours
-- Important announcements from professors/instructors
-- Graded work, feedback
-- Bills with payment due dates
-- Job applications, interviews
-- Items saying "action required", "please submit", "due by"
-- Course material, required readings
+- Assignments, homework, projects (category: assignment)
+- Quizzes, exams, tests (category: quiz)
+- Meetings, interviews, office hours (category: meeting)
+- Important announcements from professors/instructors (category: announcement)
+- Course updates, policy changes (category: announcement)
+- Graded work, feedback (category: assignment)
+- Bills with payment due dates (category: email)
+- Job applications, interviews (category: meeting)
 - Important emails from .edu domains
-- Work-related tasks and deadlines
 
 Mark isImportant=FALSE only for:
-- Birthdays, celebrations, personal social events
-- Credit card statements (unless payment due soon)
-- Marketing emails, promotions
+- Birthdays, celebrations
+- Credit card statements (no payment due)
+- Marketing, promotions
 - Social media notifications
 - Spam, newsletters
-- Deployment notifications (Vercel, GitHub)
+- Deployment notifications
 - Corporate AGM/EGM notices
 
-If isImportant=true, rewrite the title to be clear and actionable (remove "Re:", "Fwd:", make it concise).
+Categories explained:
+- "assignment" = Work to submit with deadline
+- "quiz" = Test/exam to take
+- "meeting" = Event to attend
+- "announcement" = Important info/update (no submission required, but should read)
+- "email" = Other important emails
+
+Rewrite title to be clear (remove "Re:", "Fwd:", make concise).
 
 Respond with ONLY a JSON object (no markdown):
 {
   "isImportant": true/false,
-  "title": "Clear, actionable title" or null,
-  "description": "What needs to be done" or null,
+  "title": "Clear title" or null,
+  "description": "Summary" or null,
   "dueDate": "YYYY-MM-DD" or null,
   "category": "assignment/meeting/quiz/announcement/email"
 }`;
