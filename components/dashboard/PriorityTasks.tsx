@@ -268,6 +268,7 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
           </div>
         ))}
       </div>
+      </div>
     </div>
   );
 }
