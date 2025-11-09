@@ -34,19 +34,19 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'assignment':
-        return { label: 'Assignment', icon: '📚', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' };
+        return { label: 'Assignment', icon: '📚', color: 'bg-sky-blue/30 border-sky-blue/50 text-forest-green' };
       case 'announcement':
-        return { label: 'Announcement', icon: '📢', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' };
+        return { label: 'Announcement', icon: '📢', color: 'bg-clay-orange/30 border-clay-orange/50 text-forest-green' };
       case 'quiz':
-        return { label: 'Quiz', icon: '📝', color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' };
+        return { label: 'Quiz', icon: '📝', color: 'bg-moss-green/30 border-moss-green/50 text-forest-green' };
       case 'discussion':
-        return { label: 'Discussion', icon: '💬', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' };
+        return { label: 'Discussion', icon: '💬', color: 'bg-sunflower-yellow/30 border-sunflower-yellow/50 text-forest-green' };
       case 'meeting':
-        return { label: 'Meeting', icon: '📅', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400' };
+        return { label: 'Meeting', icon: '📅', color: 'bg-ocean-teal/30 border-ocean-teal/50 text-forest-green' };
       case 'email':
-        return { label: 'Email', icon: '📧', color: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400' };
+        return { label: 'Email', icon: '📧', color: 'bg-sunset-coral/30 border-sunset-coral/50 text-forest-green' };
       default:
-        return { label: 'Task', icon: '✓', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400' };
+        return { label: 'Task', icon: '✓', color: 'bg-sage-gray/30 border-sage-gray/50 text-bark-brown' };
     }
   };
 
@@ -105,9 +105,9 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
   };
 
   const getPriorityColor = (priority: number) => {
-    if (priority >= 8) return 'text-red-600 dark:text-red-400';
-    if (priority >= 5) return 'text-orange-600 dark:text-orange-400';
-    return 'text-yellow-600 dark:text-yellow-400';
+    if (priority >= 8) return 'text-sunset-coral';
+    if (priority >= 5) return 'text-clay-orange';
+    return 'text-sunflower-yellow';
   };
 
   const getPriorityBadge = (priority: number) => {
@@ -118,12 +118,12 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
 
   if (tasks.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-8 text-center">
-        <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          All caught up!
+      <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-12 text-center shadow-md shadow-earth-brown/20">
+        <CheckCircle2 className="w-20 h-20 text-moss-green mx-auto mb-4" />
+        <h3 className="text-2xl font-bold font-serif text-forest-green mb-2">
+          All caught up! 🌿
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-bark-brown text-lg">
           No pending tasks. Enjoy your free time!
         </p>
       </div>
@@ -131,34 +131,36 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 p-6">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-        📌 Top Priority Tasks
-      </h2>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        Prioritized by AI based on deadlines and importance
-      </p>
+    <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-8 shadow-md shadow-earth-brown/20 hover:shadow-lg hover:shadow-earth-brown/30 transition-all duration-500 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-sage-gray/5"></div>
+      <div className="relative z-10">
+        <h2 className="text-2xl font-bold font-serif text-forest-green mb-2 flex items-center">
+          <span className="mr-2">🎯</span> Top Priority Tasks
+        </h2>
+        <p className="text-sm text-bark-brown mb-6 font-medium">
+          Prioritized by AI based on deadlines and importance
+        </p>
 
-      <div className="space-y-3">
-        {tasks.map((task, index) => (
-          <div
-            key={task.id}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            <div className="flex items-start space-x-3">
-              {/* Priority Number */}
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
-                {index + 1}
-              </div>
+        <div className="space-y-3">
+          {tasks.map((task, index) => (
+            <div
+              key={task.id}
+              className="border-2 border-sage-gray/30 rounded-2xl p-5 bg-stone-beige/50 hover:bg-stone-beige hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex items-start space-x-3">
+                {/* Priority Number */}
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-forest-green to-moss-green text-cream-white flex items-center justify-center font-bold text-sm shadow-md">
+                  {index + 1}
+                </div>
 
               <button
                 onClick={() => handleToggleComplete(task.id, task.completed)}
                 className="mt-1 flex-shrink-0"
               >
                 {task.completed ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <CheckCircle2 className="w-6 h-6 text-moss-green" />
                 ) : (
-                  <Circle className="w-5 h-5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400" />
+                  <Circle className="w-6 h-6 text-sage-gray hover:text-forest-green transition-colors" />
                 )}
               </button>
 
@@ -166,29 +168,29 @@ export default function PriorityTasks({ tasks }: PriorityTasksProps) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
                     <h3
-                      className={`text-base font-medium ${
+                      className={`text-lg font-semibold font-serif ${
                         task.completed
-                          ? 'line-through text-gray-400 dark:text-gray-600'
-                          : 'text-gray-900 dark:text-white'
+                          ? 'line-through text-sage-gray'
+                          : 'text-forest-green'
                       }`}
                     >
                       {task.title}
                     </h3>
                     {task.course && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {task.course}
+                      <p className="text-sm text-bark-brown mt-1 font-medium">
+                        📚 {task.course}
                       </p>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2">
                     <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${
+                      className={`text-xs font-bold px-3 py-1 rounded-full border-2 ${
                         task.priority >= 8
-                          ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                          ? 'bg-sunset-coral/20 border-sunset-coral text-sunset-coral'
                           : task.priority >= 5
-                          ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
-                          : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                          ? 'bg-clay-orange/20 border-clay-orange text-clay-orange'
+                          : 'bg-sunflower-yellow/20 border-sunflower-yellow text-earth-brown'
                       }`}
                     >
                       {getPriorityBadge(task.priority)}

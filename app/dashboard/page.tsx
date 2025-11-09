@@ -94,41 +94,46 @@ export default async function DashboardPage() {
   return (
     <>
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {greeting}, {user.name?.split(' ')[0] || 'there'}!
-            </h1>
-            <p className="text-lg text-blue-600 dark:text-blue-400 font-semibold mt-1" suppressHydrationWarning>
-              {motivationalMessage}
-            </p>
+      <main className="min-h-screen bg-gradient-to-br from-cream-white via-stone-beige to-sage-gray/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold font-serif text-forest-green">
+                {greeting}, {user.name?.split(' ')[0] || 'there'}! 🌱
+              </h1>
+              <p className="text-lg text-moss-green font-medium mt-2" suppressHydrationWarning>
+                {motivationalMessage}
+              </p>
+            </div>
+            <SyncButton />
           </div>
-          <SyncButton />
-        </div>
 
-        <DailyBrief
-          tasksDueToday={tasksDueToday.length}
-          tasksCompletedToday={tasksCompletedToday.length}
-          completionPercentage={completionPercentage}
-        />
+          <DailyBrief
+            tasksDueToday={tasksDueToday.length}
+            tasksCompletedToday={tasksCompletedToday.length}
+            completionPercentage={completionPercentage}
+          />
 
-        {/* AI Roadmap Summary */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6 mb-8 border border-blue-200 dark:border-gray-600">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-            <span className="mr-2">🎯</span>
-            Your Roadmap for Success
-          </h2>
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed" suppressHydrationWarning>
-            {roadmap}
-          </p>
-        </div>
+          {/* AI Roadmap Summary - BarkCard style */}
+          <div className="bg-cream-white border-2 border-sage-gray/30 rounded-3xl p-8 mb-8 shadow-md shadow-earth-brown/20 hover:shadow-lg hover:shadow-earth-brown/30 transition-all duration-500 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-sage-gray/5"></div>
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold font-serif text-forest-green mb-4 flex items-center">
+                <span className="mr-3 text-3xl">🎯</span>
+                Your Roadmap for Success
+              </h2>
+              <p className="text-bark-brown leading-relaxed text-lg" suppressHydrationWarning>
+                {roadmap}
+              </p>
+            </div>
+          </div>
 
-        <PriorityTasks tasks={priorityTasks} />
+          <PriorityTasks tasks={priorityTasks} />
 
-        {/* AI Chatbot */}
-        <div className="mt-8">
-          <Chatbot />
+          {/* AI Chatbot */}
+          <div className="mt-8">
+            <Chatbot />
+          </div>
         </div>
       </main>
     </>
