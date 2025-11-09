@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
     'users:read',
     'im:history',
     'im:read',
+    'stars:read', // Read starred/saved items
   ].join(',');
 
   // Build Slack OAuth authorization URL
