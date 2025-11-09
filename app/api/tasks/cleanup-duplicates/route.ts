@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
     const taskGroups = new Map<string, any[]>();
     
     for (const task of tasks) {
+      // Skip tasks without sourceId
+      if (!task.sourceId) continue;
+      
       // Normalize sourceId to handle old format without prefix
       let normalizedId = task.sourceId;
       
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
         const taskToKeep = groupTasks[0];
         
         // Update the kept task to have the correct sourceId format
-        if (!taskToKeep.sourceId.includes('_')) {
+        if (taskToKeep.sourceId && !taskToKeep.sourceId.includes('_')) {
           await prisma.task.update({
             where: { id: taskToKeep.id },
             data: { sourceId: sourceId },
