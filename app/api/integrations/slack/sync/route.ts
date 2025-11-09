@@ -50,9 +50,26 @@ export async function POST(request: NextRequest) {
 
     // Fetch user's messages and reminders
     try {
+      // First, get the authenticated user's info
+      const authResponse = await fetch('https://slack.com/api/auth.test', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      
+      const authData = await authResponse.json();
+      console.log('Auth test:', { ok: authData.ok, user_id: authData.user_id, error: authData.error });
+      
+      if (!authData.ok) {
+        console.error('Slack auth failed:', authData.error);
+        return NextResponse.json({ 
+          error: `Slack authentication failed: ${authData.error}`,
+        }, { status: 400 });
+      }
+
       // Get recent messages from channels the user is in (past 7 days)
       console.log('Calling Slack users.conversations API...');
-      const userInfoResponse = await fetch('https://slack.com/api/users.conversations', {
+      const userInfoResponse = await fetch('https://slack.com/api/users.conversations?types=public_channel,private_channel&exclude_archived=true&limit=20', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -102,7 +119,17 @@ export async function POST(request: NextRequest) {
 
               const messagesData = await messagesResponse.json();
               
-              console.log(`Channel ${channel.name} response:`, { ok: messagesData.ok, messageCount: messagesData.messages?.length, error: messagesData.error });
+              console.log(`Channel ${channel.name || channel.id} response:`, { 
+                ok: messagesData.ok, 
+                messageCount: messagesData.messages?.length, 
+                error: messagesData.error,
+                warning: messagesData.warning 
+              });
+              
+              if (!messagesData.ok) {
+                console.error(`Channel ${channel.name || channel.id} error:`, messagesData.error);
+                continue;
+              }
               
               if (messagesData.ok && messagesData.messages) {
                 for (const message of messagesData.messages) {
