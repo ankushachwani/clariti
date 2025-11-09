@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     for (const query of searchQueries) {
       try {
         const searchResponse = await fetch(
-          `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query + ' newer_than:30d')}&maxResults=50`,
+          `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query + ' newer_than:2d')}&maxResults=30`,
           {
             headers: {
               'Authorization': `Bearer ${account.access_token}`,
