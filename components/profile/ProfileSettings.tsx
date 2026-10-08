@@ -41,10 +41,10 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
   };
 
   return (
-    <div className="bg-cream-white rounded-3xl shadow-md shadow-earth-brown/20 border-2 border-sage-gray/30 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
       <div className="flex items-center gap-3 mb-6">
-        <User className="w-7 h-7 text-forest-green" />
-        <h2 className="text-2xl font-bold font-serif text-forest-green">
+        <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Profile Information
         </h2>
       </div>
@@ -52,37 +52,37 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
       <form onSubmit={handleUpdateProfile} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-bark-brown mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Full Name
             </label>
             <input
               type="text"
               name="name"
               defaultValue={user.name || ''}
-              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-bark-brown mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
             </label>
             <input
               type="email"
               value={user.email}
               disabled
-              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-sage-gray/20 text-sage-gray cursor-not-allowed"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-bark-brown mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Academic Year
             </label>
             <select
               name="academicYear"
               defaultValue={user.academicYear || ''}
-              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select year</option>
               <option value="Freshman">Freshman</option>
@@ -94,13 +94,13 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-bark-brown mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Timezone
             </label>
             <select
               name="timezone"
               defaultValue={user.timezone}
-              className="w-full px-4 py-2 border-2 border-sage-gray/30 rounded-2xl bg-stone-beige/30 text-bark-brown focus:ring-2 focus:ring-forest-green focus:border-forest-green transition-all"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="America/New_York">Eastern Time</option>
               <option value="America/Chicago">Central Time</option>
@@ -110,11 +110,11 @@ export default function ProfileSettings({ user: initialUser }: ProfileSettingsPr
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t-2 border-sage-gray/30">
+        <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-3 bg-gradient-to-br from-forest-green to-moss-green text-cream-white text-sm font-medium rounded-full hover:shadow-lg hover:scale-105 disabled:opacity-50 transition-all"
+            className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
